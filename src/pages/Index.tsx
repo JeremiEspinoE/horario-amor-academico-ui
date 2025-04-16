@@ -1,7 +1,7 @@
 
 import { Navigate } from "react-router-dom";
 
-// Redirect to login page
+// Redirigir a la página de inicio de sesión
 const Index = () => {
   return <Navigate to="/" replace />;
 };

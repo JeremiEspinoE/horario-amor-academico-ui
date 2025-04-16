@@ -23,7 +23,7 @@ export default function Login() {
     if (!username || !password) {
       toast({
         title: "Error",
-        description: "Please enter your username and password",
+        description: "Por favor, ingrese su usuario y contraseña",
         variant: "destructive",
       });
       return;
@@ -35,8 +35,8 @@ export default function Login() {
     setTimeout(() => {
       setIsLoading(false);
       toast({
-        title: "Success",
-        description: "Welcome back to AcadScheduler!",
+        title: "¡Bienvenido!",
+        description: "Has iniciado sesión en AcadScheduler",
       });
       navigate("/dashboard");
     }, 1500);
@@ -57,19 +57,19 @@ export default function Login() {
           <div className="flex justify-center mb-2">
             <Calendar className="h-12 w-12 text-primary" />
           </div>
-          <CardTitle className="text-2xl">Academic Scheduler</CardTitle>
-          <CardDescription>Login to access your account</CardDescription>
+          <CardTitle className="text-2xl">Planificador Académico</CardTitle>
+          <CardDescription>Inicia sesión para acceder a tu cuenta</CardDescription>
         </CardHeader>
         
         <CardContent>
           <form onSubmit={handleLogin} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="username">Username</Label>
+              <Label htmlFor="username">Usuario</Label>
               <div className="relative">
                 <User className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
                 <Input
                   id="username"
-                  placeholder="Enter your username"
+                  placeholder="Ingresa tu usuario"
                   className="pl-10"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
@@ -79,13 +79,13 @@ export default function Login() {
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password">Contraseña</Label>
               <div className="relative">
                 <Lock className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
                 <Input
                   id="password"
                   type={showPassword ? "text" : "password"}
-                  placeholder="Enter your password"
+                  placeholder="Ingresa tu contraseña"
                   className="pl-10 pr-10"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -112,20 +112,20 @@ export default function Login() {
               className="w-full"
               disabled={isLoading}
             >
-              {isLoading ? "Logging in..." : "Login"}
+              {isLoading ? "Iniciando sesión..." : "Iniciar Sesión"}
             </Button>
           </form>
         </CardContent>
         
         <CardFooter className="justify-center">
           <p className="text-sm text-muted-foreground">
-            Forgot password? Contact your administrator
+            ¿Olvidaste tu contraseña? Contacta a tu administrador
           </p>
         </CardFooter>
       </Card>
       
       <div className="absolute bottom-4 text-center w-full text-sm text-muted-foreground">
-        &copy; {new Date().getFullYear()} Academic Scheduler. All rights reserved.
+        &copy; {new Date().getFullYear()} Planificador Académico. Todos los derechos reservados.
       </div>
     </div>
   );

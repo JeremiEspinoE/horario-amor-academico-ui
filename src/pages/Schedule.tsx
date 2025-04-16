@@ -54,7 +54,7 @@ type TimeSlot = {
 type ScheduleType = Record<string, TimeSlot[]>;
 
 export default function Schedule() {
-  const daysOfWeek = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
+  const daysOfWeek = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes"];
   const timeSlots = Array.from({ length: 14 }, (_, i) => 8 + i); // 8 AM to 9 PM
 
   const formatTimeSlot = (hour: number) => {
@@ -63,147 +63,147 @@ export default function Schedule() {
 
   // Sample schedule data with some conflicts
   const initialSchedule: ScheduleType = {
-    Monday: Array.from({ length: 14 }, () => ({ courses: [] })),
-    Tuesday: Array.from({ length: 14 }, () => ({ courses: [] })),
-    Wednesday: Array.from({ length: 14 }, () => ({ courses: [] })),
-    Thursday: Array.from({ length: 14 }, () => ({ courses: [] })),
-    Friday: Array.from({ length: 14 }, () => ({ courses: [] })),
+    Lunes: Array.from({ length: 14 }, () => ({ courses: [] })),
+    Martes: Array.from({ length: 14 }, () => ({ courses: [] })),
+    Miércoles: Array.from({ length: 14 }, () => ({ courses: [] })),
+    Jueves: Array.from({ length: 14 }, () => ({ courses: [] })),
+    Viernes: Array.from({ length: 14 }, () => ({ courses: [] })),
   };
 
   // Add some sample courses
-  initialSchedule.Monday[1].courses.push({
+  initialSchedule.Lunes[1].courses.push({
     code: "CS101",
-    name: "Intro to Programming",
-    room: "SCI-101",
-    faculty: "Dr. Jane Smith",
+    name: "Intro a Programación",
+    room: "CIE-101",
+    faculty: "Dra. Jane Smith",
     colorClass: "bg-academic-600 text-white",
   });
 
-  initialSchedule.Monday[2].courses.push({
+  initialSchedule.Lunes[2].courses.push({
     code: "CS101",
-    name: "Intro to Programming",
-    room: "SCI-101",
-    faculty: "Dr. Jane Smith",
+    name: "Intro a Programación",
+    room: "CIE-101",
+    faculty: "Dra. Jane Smith",
     colorClass: "bg-academic-600 text-white",
   });
 
-  initialSchedule.Wednesday[1].courses.push({
+  initialSchedule.Miércoles[1].courses.push({
     code: "CS101",
-    name: "Intro to Programming",
-    room: "SCI-101",
-    faculty: "Dr. Jane Smith",
+    name: "Intro a Programación",
+    room: "CIE-101",
+    faculty: "Dra. Jane Smith",
     colorClass: "bg-academic-600 text-white",
   });
 
-  initialSchedule.Wednesday[2].courses.push({
+  initialSchedule.Miércoles[2].courses.push({
     code: "CS101",
-    name: "Intro to Programming",
-    room: "SCI-101",
-    faculty: "Dr. Jane Smith",
+    name: "Intro a Programación",
+    room: "CIE-101",
+    faculty: "Dra. Jane Smith",
     colorClass: "bg-academic-600 text-white",
   });
 
-  initialSchedule.Tuesday[3].courses.push({
+  initialSchedule.Martes[3].courses.push({
     code: "MATH201",
-    name: "Calculus I",
-    room: "SCI-203",
-    faculty: "Dr. Sarah Williams",
+    name: "Cálculo I",
+    room: "CIE-203",
+    faculty: "Dra. Sarah Williams",
     colorClass: "bg-faculty-600 text-white",
   });
 
-  initialSchedule.Tuesday[4].courses.push({
+  initialSchedule.Martes[4].courses.push({
     code: "MATH201",
-    name: "Calculus I",
-    room: "SCI-203",
-    faculty: "Dr. Sarah Williams",
+    name: "Cálculo I",
+    room: "CIE-203",
+    faculty: "Dra. Sarah Williams",
     colorClass: "bg-faculty-600 text-white",
   });
 
-  initialSchedule.Thursday[3].courses.push({
+  initialSchedule.Jueves[3].courses.push({
     code: "MATH201",
-    name: "Calculus I",
-    room: "SCI-203",
-    faculty: "Dr. Sarah Williams",
+    name: "Cálculo I",
+    room: "CIE-203",
+    faculty: "Dra. Sarah Williams",
     colorClass: "bg-faculty-600 text-white",
   });
 
-  initialSchedule.Thursday[4].courses.push({
+  initialSchedule.Jueves[4].courses.push({
     code: "MATH201",
-    name: "Calculus I",
-    room: "SCI-203",
-    faculty: "Dr. Sarah Williams",
+    name: "Cálculo I",
+    room: "CIE-203",
+    faculty: "Dra. Sarah Williams",
     colorClass: "bg-faculty-600 text-white",
   });
 
-  initialSchedule.Tuesday[6].courses.push({
+  initialSchedule.Martes[6].courses.push({
     code: "BUS101",
-    name: "Intro to Business",
-    room: "BUS-301",
+    name: "Intro a Negocios",
+    room: "NEG-301",
     faculty: "Prof. Michael Johnson",
     colorClass: "bg-course-600 text-white",
   });
 
-  initialSchedule.Tuesday[7].courses.push({
+  initialSchedule.Martes[7].courses.push({
     code: "BUS101",
-    name: "Intro to Business",
-    room: "BUS-301",
+    name: "Intro a Negocios",
+    room: "NEG-301",
     faculty: "Prof. Michael Johnson",
     colorClass: "bg-course-600 text-white",
   });
 
-  initialSchedule.Thursday[6].courses.push({
+  initialSchedule.Jueves[6].courses.push({
     code: "BUS101",
-    name: "Intro to Business",
-    room: "BUS-301",
+    name: "Intro a Negocios",
+    room: "NEG-301",
     faculty: "Prof. Michael Johnson",
     colorClass: "bg-course-600 text-white",
   });
 
-  initialSchedule.Thursday[7].courses.push({
+  initialSchedule.Jueves[7].courses.push({
     code: "BUS101",
-    name: "Intro to Business",
-    room: "BUS-301",
+    name: "Intro a Negocios",
+    room: "NEG-301",
     faculty: "Prof. Michael Johnson",
     colorClass: "bg-course-600 text-white",
   });
 
   // Add a conflict
-  initialSchedule.Monday[5].courses.push({
+  initialSchedule.Lunes[5].courses.push({
     code: "CS201",
-    name: "Data Structures",
-    room: "SCI-102",
-    faculty: "Dr. Jane Smith",
+    name: "Estructura de Datos",
+    room: "CIE-102",
+    faculty: "Dra. Jane Smith",
     colorClass: "bg-academic-600 text-white",
   });
 
-  initialSchedule.Monday[5].courses.push({
+  initialSchedule.Lunes[5].courses.push({
     code: "PHYS101",
-    name: "Physics I",
-    room: "SCI-102",
+    name: "Física I",
+    room: "CIE-102",
     faculty: "Dr. Robert Lee",
     colorClass: "bg-room-600 text-white",
     hasConflict: true,
   });
 
-  initialSchedule.Monday[6].courses.push({
+  initialSchedule.Lunes[6].courses.push({
     code: "CS201",
-    name: "Data Structures",
-    room: "SCI-102",
-    faculty: "Dr. Jane Smith",
+    name: "Estructura de Datos",
+    room: "CIE-102",
+    faculty: "Dra. Jane Smith",
     colorClass: "bg-academic-600 text-white",
   });
 
-  initialSchedule.Monday[6].courses.push({
+  initialSchedule.Lunes[6].courses.push({
     code: "PHYS101",
-    name: "Physics I",
-    room: "SCI-102",
+    name: "Física I",
+    room: "CIE-102",
     faculty: "Dr. Robert Lee",
     colorClass: "bg-room-600 text-white",
     hasConflict: true,
   });
 
   const [schedule, setSchedule] = useState<ScheduleType>(initialSchedule);
-  const [currentPeriod, setCurrentPeriod] = useState("2025 Spring");
+  const [currentPeriod, setCurrentPeriod] = useState("Primavera 2025");
   const [showFilters, setShowFilters] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -235,7 +235,7 @@ export default function Schedule() {
   return (
     <div className="space-y-6 animate-fade-in">
       <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold">Schedule</h1>
+        <h1 className="text-3xl font-bold">Horario</h1>
         <div className="flex items-center gap-2">
           <div className="flex items-center">
             <Button variant="outline" size="icon">
@@ -250,27 +250,27 @@ export default function Schedule() {
             <AlertDialogTrigger asChild>
               <Button variant="outline">
                 <CalendarIcon className="mr-2 h-4 w-4" />
-                Publish Schedule
+                Publicar Horario
               </Button>
             </AlertDialogTrigger>
             <AlertDialogContent>
               <AlertDialogHeader>
-                <AlertDialogTitle>Publish Schedule</AlertDialogTitle>
+                <AlertDialogTitle>Publicar Horario</AlertDialogTitle>
                 <AlertDialogDescription>
-                  Are you sure you want to publish the {currentPeriod} schedule? This will make it
-                  visible to all faculty and students.
+                  ¿Estás seguro de que deseas publicar el horario de {currentPeriod}? Esto lo hará
+                  visible para todos los docentes y estudiantes.
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction>Publish</AlertDialogAction>
+                <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                <AlertDialogAction>Publicar</AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
 
           <Button>
             <Download className="mr-2 h-4 w-4" />
-            Export
+            Exportar
           </Button>
         </div>
       </div>
@@ -278,19 +278,19 @@ export default function Schedule() {
       <div className="flex flex-col md:flex-row gap-4">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input placeholder="Search schedule..." className="pl-10" onChange={handleSearch} />
+          <Input placeholder="Buscar en horario..." className="pl-10" onChange={handleSearch} />
         </div>
         <Popover open={showFilters} onOpenChange={setShowFilters}>
           <PopoverTrigger asChild>
             <Button variant="outline" className="w-full md:w-[150px]">
               <Filter className="mr-2 h-4 w-4" />
-              Filters
+              Filtros
             </Button>
           </PopoverTrigger>
           <PopoverContent className="w-[220px] p-4">
             <div className="grid gap-4">
               <div className="space-y-2">
-                <h4 className="font-medium text-sm">Department</h4>
+                <h4 className="font-medium text-sm">Departamento</h4>
                 <div className="space-y-2">
                   <div className="flex items-center space-x-2">
                     <Checkbox id="comp-sci" />
@@ -298,7 +298,7 @@ export default function Schedule() {
                       htmlFor="comp-sci"
                       className="text-sm font-normal leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                     >
-                      Computer Science
+                      Informática
                     </label>
                   </div>
                   <div className="flex items-center space-x-2">
@@ -307,7 +307,7 @@ export default function Schedule() {
                       htmlFor="business"
                       className="text-sm font-normal leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                     >
-                      Business
+                      Negocios
                     </label>
                   </div>
                   <div className="flex items-center space-x-2">
@@ -316,13 +316,13 @@ export default function Schedule() {
                       htmlFor="math"
                       className="text-sm font-normal leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                     >
-                      Mathematics
+                      Matemáticas
                     </label>
                   </div>
                 </div>
               </div>
               <div className="space-y-2">
-                <h4 className="font-medium text-sm">Display Options</h4>
+                <h4 className="font-medium text-sm">Opciones de visualización</h4>
                 <div className="space-y-2">
                   <div className="flex items-center space-x-2">
                     <Checkbox id="show-conflicts" defaultChecked />
@@ -330,7 +330,7 @@ export default function Schedule() {
                       htmlFor="show-conflicts"
                       className="text-sm font-normal leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                     >
-                      Highlight conflicts
+                      Resaltar conflictos
                     </label>
                   </div>
                   <div className="flex items-center space-x-2">
@@ -339,7 +339,7 @@ export default function Schedule() {
                       htmlFor="show-empty"
                       className="text-sm font-normal leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                     >
-                      Hide empty slots
+                      Ocultar espacios vacíos
                     </label>
                   </div>
                 </div>
@@ -350,7 +350,7 @@ export default function Schedule() {
                 className="mt-2"
                 onClick={() => setShowFilters(false)}
               >
-                Apply Filters
+                Aplicar Filtros
               </Button>
             </div>
           </PopoverContent>
@@ -359,7 +359,7 @@ export default function Schedule() {
 
       <div className="border rounded-md overflow-auto">
         <div className="grid grid-cols-[auto_repeat(5,1fr)] min-w-[800px]">
-          <div className="bg-muted/50 border-b border-r p-3 font-medium">Time</div>
+          <div className="bg-muted/50 border-b border-r p-3 font-medium">Hora</div>
           {daysOfWeek.map((day) => (
             <div
               key={day}
@@ -415,23 +415,23 @@ export default function Schedule() {
       <div className="flex gap-3 flex-wrap">
         <div className="flex items-center gap-2">
           <div className="w-3 h-3 rounded-sm bg-academic-600"></div>
-          <span className="text-sm">Computer Science</span>
+          <span className="text-sm">Informática</span>
         </div>
         <div className="flex items-center gap-2">
           <div className="w-3 h-3 rounded-sm bg-faculty-600"></div>
-          <span className="text-sm">Mathematics</span>
+          <span className="text-sm">Matemáticas</span>
         </div>
         <div className="flex items-center gap-2">
           <div className="w-3 h-3 rounded-sm bg-course-600"></div>
-          <span className="text-sm">Business</span>
+          <span className="text-sm">Negocios</span>
         </div>
         <div className="flex items-center gap-2">
           <div className="w-3 h-3 rounded-sm bg-room-600"></div>
-          <span className="text-sm">Physics</span>
+          <span className="text-sm">Física</span>
         </div>
         <div className="flex items-center gap-2">
           <div className="w-3 h-3 rounded-sm bg-destructive"></div>
-          <span className="text-sm">Conflicts</span>
+          <span className="text-sm">Conflictos</span>
         </div>
       </div>
     </div>
