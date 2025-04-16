@@ -30,12 +30,12 @@ import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 
 const mainNavItems = [
-  { name: "Dashboard", path: "/dashboard", icon: LayoutDashboard },
-  { name: "Faculty", path: "/faculty", icon: Users },
-  { name: "Courses", path: "/courses", icon: BookOpen },
-  { name: "Availability", path: "/availability", icon: Calendar },
-  { name: "Schedule", path: "/schedule", icon: BookText },
-  { name: "Settings", path: "/settings", icon: Settings }
+  { name: "Panel Principal", path: "/dashboard", icon: LayoutDashboard },
+  { name: "Docentes", path: "/faculty", icon: Users },
+  { name: "Asignaturas", path: "/courses", icon: BookOpen },
+  { name: "Disponibilidad", path: "/availability", icon: Calendar },
+  { name: "Horario", path: "/schedule", icon: BookText },
+  { name: "Configuración", path: "/settings", icon: Settings }
 ];
 
 export default function AppLayout() {
@@ -48,8 +48,8 @@ export default function AppLayout() {
 
   const handleNotificationClick = () => {
     toast({
-      title: "Notifications",
-      description: "You have no new notifications",
+      title: "Notificaciones",
+      description: "No tienes notificaciones nuevas",
     });
   };
 
@@ -68,7 +68,7 @@ export default function AppLayout() {
             className="flex items-center gap-2 font-bold text-primary"
           >
             <Calendar className="h-6 w-6" />
-            {!collapsed && <span>AcadScheduler</span>}
+            {!collapsed && <span>HorarioAcad</span>}
           </Link>
           <Button
             variant="ghost"
@@ -105,28 +105,28 @@ export default function AppLayout() {
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon" className="rounded-full">
                   <Avatar className="h-8 w-8">
-                    <AvatarImage src="" alt="User" />
+                    <AvatarImage src="" alt="Usuario" />
                     <AvatarFallback>AD</AvatarFallback>
                   </Avatar>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuLabel>Admin User</DropdownMenuLabel>
+                <DropdownMenuLabel>Usuario Administrador</DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem>Profile</DropdownMenuItem>
-                <DropdownMenuItem>Settings</DropdownMenuItem>
+                <DropdownMenuItem>Perfil</DropdownMenuItem>
+                <DropdownMenuItem>Configuración</DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem>
                   <Link to="/" className="flex items-center gap-2 w-full">
                     <LogOut className="h-4 w-4" />
-                    <span>Logout</span>
+                    <span>Cerrar sesión</span>
                   </Link>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
             {!collapsed && <div>
-              <p className="text-sm font-medium">Admin User</p>
-              <p className="text-xs text-muted-foreground">admin@school.edu</p>
+              <p className="text-sm font-medium">Usuario Administrador</p>
+              <p className="text-xs text-muted-foreground">admin@escuela.edu</p>
             </div>}
           </div>
         </div>
