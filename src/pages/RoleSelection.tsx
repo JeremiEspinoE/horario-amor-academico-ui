@@ -14,7 +14,7 @@ export default function RoleSelection() {
 
   const handleContinue = () => {
     if (selectedRole) {
-      // Por ahora solo redirigimos al login, pero podríamos usar el rol después
+      localStorage.setItem('userRole', selectedRole);
       navigate("/login");
     }
   };

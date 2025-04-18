@@ -1,6 +1,5 @@
-
-import { useState } from "react";
-import { Link, Outlet } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Link, Outlet, useNavigate } from "react-router-dom";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import { 
   Bell, 
@@ -14,7 +13,8 @@ import {
   Menu, 
   Settings, 
   Users, 
-  BookText
+  BookText,
+  UserCircle
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -29,19 +29,47 @@ import {
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 
-const mainNavItems = [
-  { name: "Panel Principal", path: "/dashboard", icon: LayoutDashboard },
-  { name: "Docentes", path: "/faculty", icon: Users },
-  { name: "Asignaturas", path: "/courses", icon: BookOpen },
-  { name: "Disponibilidad", path: "/availability", icon: Calendar },
-  { name: "Horario", path: "/schedule", icon: BookText },
-  { name: "Configuración", path: "/settings", icon: Settings }
-];
+const getNavItems = (role: string) => {
+  const adminItems = [
+    { name: "Panel Principal", path: "/dashboard", icon: LayoutDashboard },
+    { name: "Docentes", path: "/faculty", icon: Users },
+    { name: "Asignaturas", path: "/courses", icon: BookOpen },
+    { name: "Disponibilidad", path: "/availability", icon: Calendar },
+    { name: "Horario", path: "/schedule", icon: BookText },
+    { name: "Configuración", path: "/settings", icon: Settings }
+  ];
+
+  const teacherItems = [
+    { name: "Mi Disponibilidad", path: "/availability", icon: Calendar },
+    { name: "Mi Horario", path: "/schedule", icon: BookText },
+    { name: "Mi Perfil", path: "/settings", icon: UserCircle }
+  ];
+
+  return role === "administrativo" ? adminItems : teacherItems;
+};
 
 export default function AppLayout() {
   const [collapsed, setCollapsed] = useState(false);
   const { toast } = useToast();
+  const navigate = useNavigate();
+  const [userRole, setUserRole] = useState<string>("");
+
+  useEffect(() => {
+    const role = localStorage.getItem('userRole');
+    if (!role) {
+      navigate('/');
+      return;
+    }
+    setUserRole(role);
+  }, [navigate]);
+
+  const mainNavItems = getNavItems(userRole);
   
+  const handleLogout = () => {
+    localStorage.removeItem('userRole');
+    navigate('/');
+  };
+
   const toggleSidebar = () => {
     setCollapsed(!collapsed);
   };
@@ -106,27 +134,33 @@ export default function AppLayout() {
                 <Button variant="ghost" size="icon" className="rounded-full">
                   <Avatar className="h-8 w-8">
                     <AvatarImage src="" alt="Usuario" />
-                    <AvatarFallback>AD</AvatarFallback>
+                    <AvatarFallback>
+                      {userRole === "administrativo" ? "AD" : "DC"}
+                    </AvatarFallback>
                   </Avatar>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuLabel>Usuario Administrador</DropdownMenuLabel>
+                <DropdownMenuLabel>
+                  {userRole === "administrativo" ? "Usuario Administrativo" : "Usuario Docente"}
+                </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem>Perfil</DropdownMenuItem>
                 <DropdownMenuItem>Configuración</DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem>
-                  <Link to="/" className="flex items-center gap-2 w-full">
+                <DropdownMenuItem onClick={handleLogout}>
+                  <div className="flex items-center gap-2 w-full">
                     <LogOut className="h-4 w-4" />
                     <span>Cerrar sesión</span>
-                  </Link>
+                  </div>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
             {!collapsed && <div>
-              <p className="text-sm font-medium">Usuario Administrador</p>
-              <p className="text-xs text-muted-foreground">admin@escuela.edu</p>
+              <p className="text-sm font-medium">
+                {userRole === "administrativo" ? "Usuario Administrativo" : "Usuario Docente"}
+              </p>
+              <p className="text-xs text-muted-foreground">usuario@escuela.edu</p>
             </div>}
           </div>
         </div>
@@ -139,7 +173,6 @@ export default function AppLayout() {
           collapsed ? "ml-[70px]" : "ml-[250px]"
         )}
       >
-        {/* Header */}
         <header className="h-16 border-b border-border flex items-center gap-4 px-4">
           <Button
             variant="ghost"
@@ -162,7 +195,6 @@ export default function AppLayout() {
           </div>
         </header>
 
-        {/* Page Content */}
         <main className="flex-1 overflow-y-auto p-6">
           <Outlet />
         </main>
