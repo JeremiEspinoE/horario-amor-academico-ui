@@ -66,81 +66,81 @@ export default function Courses() {
     {
       id: "1",
       code: "CS101",
-      name: "Introduction to Programming",
-      department: "Computer Science",
+      name: "Introducción a la Programación",
+      department: "Ciencias de la Computación",
       credits: 3,
       semester: 1,
-      program: "Computer Science",
+      program: "Ciencias de la Computación",
     },
     {
       id: "2",
       code: "CS201",
-      name: "Data Structures",
-      department: "Computer Science",
+      name: "Estructuras de Datos",
+      department: "Ciencias de la Computación",
       credits: 4,
       semester: 2,
-      program: "Computer Science",
+      program: "Ciencias de la Computación",
     },
     {
       id: "3",
       code: "BUS101",
-      name: "Introduction to Business",
-      department: "Business",
+      name: "Introducción a los Negocios",
+      department: "Negocios",
       credits: 3,
       semester: 1,
-      program: "Business Administration",
+      program: "Administración de Empresas",
     },
     {
       id: "4",
       code: "MATH201",
-      name: "Calculus I",
-      department: "Mathematics",
+      name: "Cálculo I",
+      department: "Matemáticas",
       credits: 4,
       semester: 1,
-      program: "Mathematics",
+      program: "Matemáticas",
     },
     {
       id: "5",
       code: "MATH202",
-      name: "Calculus II",
-      department: "Mathematics",
+      name: "Cálculo II",
+      department: "Matemáticas",
       credits: 4,
       semester: 2,
-      program: "Mathematics",
+      program: "Matemáticas",
     },
     {
       id: "6",
       code: "CS301",
-      name: "Algorithms",
-      department: "Computer Science",
+      name: "Algoritmos",
+      department: "Ciencias de la Computación",
       credits: 4,
       semester: 3,
-      program: "Computer Science",
+      program: "Ciencias de la Computación",
     },
     {
       id: "7",
       code: "CS401",
-      name: "Operating Systems",
-      department: "Computer Science",
+      name: "Sistemas Operativos",
+      department: "Ciencias de la Computación",
       credits: 3,
       semester: 4,
-      program: "Computer Science",
+      program: "Ciencias de la Computación",
     },
     {
       id: "8",
       code: "BUS201",
-      name: "Marketing Fundamentals",
-      department: "Business",
+      name: "Fundamentos de Marketing",
+      department: "Negocios",
       credits: 3,
       semester: 2,
-      program: "Business Administration",
+      program: "Administración de Empresas",
     },
   ]);
 
   const [programs, setPrograms] = useState<Program[]>([
-    { id: "1", name: "Computer Science" },
-    { id: "2", name: "Business Administration" },
-    { id: "3", name: "Mathematics" },
+    { id: "1", name: "Ciencias de la Computación" },
+    { id: "2", name: "Administración de Empresas" },
+    { id: "3", name: "Matemáticas" },
   ]);
 
   const [selectedView, setSelectedView] = useState<"list" | "program">("program");
@@ -149,10 +149,10 @@ export default function Courses() {
   const [newCourse, setNewCourse] = useState<Omit<Course, "id">>({
     code: "",
     name: "",
-    department: "Computer Science",
+    department: "Ciencias de la Computación",
     credits: 3,
     semester: 1,
-    program: "Computer Science",
+    program: "Ciencias de la Computación",
   });
 
   const [isAddProgramDialogOpen, setIsAddProgramDialogOpen] = useState(false);
@@ -208,8 +208,8 @@ export default function Courses() {
   const handleAddCourse = () => {
     if (!newCourse.code || !newCourse.name) {
       toast({
-        title: "Missing Information",
-        description: "Please provide course code and name",
+        title: "Información Faltante",
+        description: "Por favor proporcione código y nombre de la asignatura",
         variant: "destructive",
       });
       return;
@@ -222,23 +222,23 @@ export default function Courses() {
     setNewCourse({
       code: "",
       name: "",
-      department: "Computer Science",
+      department: "Ciencias de la Computación",
       credits: 3,
       semester: 1,
-      program: "Computer Science",
+      program: "Ciencias de la Computación",
     });
 
     toast({
-      title: "Success",
-      description: "Course added successfully",
+      title: "Éxito",
+      description: "Asignatura añadida correctamente",
     });
   };
 
   const handleAddProgram = () => {
     if (!newProgram) {
       toast({
-        title: "Missing Information",
-        description: "Please provide program name",
+        title: "Información Faltante",
+        description: "Por favor proporcione el nombre del programa",
         variant: "destructive",
       });
       return;
@@ -250,16 +250,16 @@ export default function Courses() {
     setNewProgram("");
 
     toast({
-      title: "Success",
-      description: "Program added successfully",
+      title: "Éxito",
+      description: "Programa añadido correctamente",
     });
   };
 
   const handleDeleteCourse = (id: string) => {
     setCourses((prev) => prev.filter((c) => c.id !== id));
     toast({
-      title: "Course Removed",
-      description: "Course has been removed",
+      title: "Asignatura Eliminada",
+      description: "La asignatura ha sido eliminada",
       variant: "destructive",
     });
   };
@@ -267,25 +267,25 @@ export default function Courses() {
   return (
     <div className="space-y-6 animate-fade-in">
       <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold">Courses & Programs</h1>
+        <h1 className="text-3xl font-bold">Asignaturas y Programas</h1>
         <div className="flex gap-2">
           <Dialog open={isAddProgramDialogOpen} onOpenChange={setIsAddProgramDialogOpen}>
             <DialogTrigger asChild>
               <Button variant="outline">
                 <Plus className="mr-2 h-4 w-4" />
-                Add Program
+                Añadir Programa
               </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-md">
               <DialogHeader>
-                <DialogTitle>Add New Program</DialogTitle>
-                <DialogDescription>Enter the name for the new academic program.</DialogDescription>
+                <DialogTitle>Añadir Nuevo Programa</DialogTitle>
+                <DialogDescription>Ingrese el nombre para el nuevo programa académico.</DialogDescription>
               </DialogHeader>
 
               <div className="grid gap-4 py-4">
                 <div className="grid grid-cols-4 items-center gap-4">
                   <Label htmlFor="program-name" className="text-right">
-                    Name
+                    Nombre
                   </Label>
                   <Input
                     id="program-name"
@@ -298,9 +298,9 @@ export default function Courses() {
 
               <DialogFooter>
                 <Button variant="outline" onClick={() => setIsAddProgramDialogOpen(false)}>
-                  Cancel
+                  Cancelar
                 </Button>
-                <Button onClick={handleAddProgram}>Add Program</Button>
+                <Button onClick={handleAddProgram}>Añadir Programa</Button>
               </DialogFooter>
             </DialogContent>
           </Dialog>
@@ -309,19 +309,19 @@ export default function Courses() {
             <DialogTrigger asChild>
               <Button>
                 <Plus className="mr-2 h-4 w-4" />
-                Add Course
+                Añadir Asignatura
               </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-md">
               <DialogHeader>
-                <DialogTitle>Add New Course</DialogTitle>
-                <DialogDescription>Enter the details for the new course.</DialogDescription>
+                <DialogTitle>Añadir Nueva Asignatura</DialogTitle>
+                <DialogDescription>Ingrese los detalles para la nueva asignatura.</DialogDescription>
               </DialogHeader>
 
               <div className="grid gap-4 py-4">
                 <div className="grid grid-cols-4 items-center gap-4">
                   <Label htmlFor="code" className="text-right">
-                    Course Code
+                    Código
                   </Label>
                   <Input
                     id="code"
@@ -329,12 +329,12 @@ export default function Courses() {
                     value={newCourse.code}
                     onChange={handleCourseInputChange}
                     className="col-span-3"
-                    placeholder="e.g. CS101"
+                    placeholder="ej. CS101"
                   />
                 </div>
                 <div className="grid grid-cols-4 items-center gap-4">
                   <Label htmlFor="name" className="text-right">
-                    Course Name
+                    Nombre
                   </Label>
                   <Input
                     id="name"
@@ -342,35 +342,35 @@ export default function Courses() {
                     value={newCourse.name}
                     onChange={handleCourseInputChange}
                     className="col-span-3"
-                    placeholder="e.g. Introduction to Programming"
+                    placeholder="ej. Introducción a la Programación"
                   />
                 </div>
                 <div className="grid grid-cols-4 items-center gap-4">
                   <Label htmlFor="department" className="text-right">
-                    Department
+                    Departamento
                   </Label>
                   <Select value={newCourse.department} onValueChange={handleDepartmentChange}>
                     <SelectTrigger className="col-span-3">
-                      <SelectValue placeholder="Select department" />
+                      <SelectValue placeholder="Seleccionar departamento" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectGroup>
-                        <SelectItem value="Computer Science">Computer Science</SelectItem>
-                        <SelectItem value="Business">Business</SelectItem>
-                        <SelectItem value="Mathematics">Mathematics</SelectItem>
-                        <SelectItem value="Engineering">Engineering</SelectItem>
-                        <SelectItem value="English">English</SelectItem>
+                        <SelectItem value="Ciencias de la Computación">Ciencias de la Computación</SelectItem>
+                        <SelectItem value="Negocios">Negocios</SelectItem>
+                        <SelectItem value="Matemáticas">Matemáticas</SelectItem>
+                        <SelectItem value="Ingeniería">Ingeniería</SelectItem>
+                        <SelectItem value="Inglés">Inglés</SelectItem>
                       </SelectGroup>
                     </SelectContent>
                   </Select>
                 </div>
                 <div className="grid grid-cols-4 items-center gap-4">
                   <Label htmlFor="program" className="text-right">
-                    Program
+                    Programa
                   </Label>
                   <Select value={newCourse.program} onValueChange={handleProgramChange}>
                     <SelectTrigger className="col-span-3">
-                      <SelectValue placeholder="Select program" />
+                      <SelectValue placeholder="Seleccionar programa" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectGroup>
@@ -385,7 +385,7 @@ export default function Courses() {
                 </div>
                 <div className="grid grid-cols-4 items-center gap-4">
                   <Label htmlFor="credits" className="text-right">
-                    Credits
+                    Créditos
                   </Label>
                   <Input
                     id="credits"
@@ -400,7 +400,7 @@ export default function Courses() {
                 </div>
                 <div className="grid grid-cols-4 items-center gap-4">
                   <Label htmlFor="semester" className="text-right">
-                    Semester
+                    Semestre
                   </Label>
                   <Input
                     id="semester"
@@ -417,9 +417,9 @@ export default function Courses() {
 
               <DialogFooter>
                 <Button variant="outline" onClick={() => setIsAddCourseDialogOpen(false)}>
-                  Cancel
+                  Cancelar
                 </Button>
-                <Button onClick={handleAddCourse}>Add Course</Button>
+                <Button onClick={handleAddCourse}>Añadir Asignatura</Button>
               </DialogFooter>
             </DialogContent>
           </Dialog>
@@ -430,7 +430,7 @@ export default function Courses() {
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Search courses..."
+            placeholder="Buscar asignaturas..."
             className="pl-10"
             value={searchQuery}
             onChange={handleSearch}
@@ -440,15 +440,15 @@ export default function Courses() {
           <Select defaultValue="all-departments">
             <SelectTrigger className="w-full sm:w-[200px]">
               <Filter className="mr-2 h-4 w-4" />
-              <SelectValue placeholder="Department" />
+              <SelectValue placeholder="Departamento" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all-departments">All Departments</SelectItem>
-              <SelectItem value="computer-science">Computer Science</SelectItem>
-              <SelectItem value="business">Business</SelectItem>
-              <SelectItem value="mathematics">Mathematics</SelectItem>
-              <SelectItem value="engineering">Engineering</SelectItem>
-              <SelectItem value="english">English</SelectItem>
+              <SelectItem value="all-departments">Todos los Departamentos</SelectItem>
+              <SelectItem value="computer-science">Ciencias de la Computación</SelectItem>
+              <SelectItem value="business">Negocios</SelectItem>
+              <SelectItem value="mathematics">Matemáticas</SelectItem>
+              <SelectItem value="engineering">Ingeniería</SelectItem>
+              <SelectItem value="english">Inglés</SelectItem>
             </SelectContent>
           </Select>
           
@@ -459,7 +459,7 @@ export default function Courses() {
               onClick={() => setSelectedView("program")}
               className="rounded-r-none"
             >
-              Program View
+              Vista Programa
             </Button>
             <Button
               variant={selectedView === "list" ? "default" : "ghost"}
@@ -467,7 +467,7 @@ export default function Courses() {
               onClick={() => setSelectedView("list")}
               className="rounded-l-none"
             >
-              List View
+              Vista Lista
             </Button>
           </div>
         </div>
@@ -492,7 +492,7 @@ export default function Courses() {
                         <AccordionTrigger className="px-6 py-3 hover:bg-muted/30">
                           <div className="flex items-center">
                             <span className="font-semibold">
-                              Semester {semester} ({semesterCourses.length} courses)
+                              Semestre {semester} ({semesterCourses.length} asignaturas)
                             </span>
                           </div>
                         </AccordionTrigger>
@@ -510,7 +510,7 @@ export default function Courses() {
                                   <div>
                                     <div className="font-medium">{course.name}</div>
                                     <div className="text-xs text-muted-foreground">
-                                      {course.department} • {course.credits} credits
+                                      {course.department} • {course.credits} créditos
                                     </div>
                                   </div>
                                 </div>
@@ -518,7 +518,7 @@ export default function Courses() {
                                   <DropdownMenuTrigger asChild>
                                     <Button variant="ghost" size="icon">
                                       <MoreHorizontal className="h-4 w-4" />
-                                      <span className="sr-only">Actions</span>
+                                      <span className="sr-only">Acciones</span>
                                     </Button>
                                   </DropdownMenuTrigger>
                                   <DropdownMenuContent align="end">
@@ -527,7 +527,7 @@ export default function Courses() {
                                       onClick={() => handleDeleteCourse(course.id)}
                                     >
                                       <Trash2 className="mr-2 h-4 w-4" />
-                                      <span>Delete</span>
+                                      <span>Eliminar</span>
                                     </DropdownMenuItem>
                                   </DropdownMenuContent>
                                 </DropdownMenu>
@@ -547,12 +547,12 @@ export default function Courses() {
           <table className="w-full">
             <thead>
               <tr className="border-b bg-muted/50">
-                <th className="text-left py-3 px-4">Code</th>
-                <th className="text-left py-3 px-4">Name</th>
-                <th className="text-left py-3 px-4">Program</th>
-                <th className="text-left py-3 px-4">Semester</th>
-                <th className="text-left py-3 px-4">Credits</th>
-                <th className="text-right py-3 px-4">Actions</th>
+                <th className="text-left py-3 px-4">Código</th>
+                <th className="text-left py-3 px-4">Nombre</th>
+                <th className="text-left py-3 px-4">Programa</th>
+                <th className="text-left py-3 px-4">Semestre</th>
+                <th className="text-left py-3 px-4">Créditos</th>
+                <th className="text-right py-3 px-4">Acciones</th>
               </tr>
             </thead>
             <tbody>
@@ -568,7 +568,7 @@ export default function Courses() {
                       <DropdownMenuTrigger asChild>
                         <Button variant="ghost" size="icon">
                           <MoreHorizontal className="h-4 w-4" />
-                          <span className="sr-only">Actions</span>
+                          <span className="sr-only">Acciones</span>
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
@@ -577,7 +577,7 @@ export default function Courses() {
                           onClick={() => handleDeleteCourse(course.id)}
                         >
                           <Trash2 className="mr-2 h-4 w-4" />
-                          <span>Delete</span>
+                          <span>Eliminar</span>
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>

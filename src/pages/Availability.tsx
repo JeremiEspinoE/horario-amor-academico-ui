@@ -34,7 +34,7 @@ type FacultyAvailability = {
 };
 
 export default function Availability() {
-  const daysOfWeek = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
+  const diasDeSemana = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes"];
   const timeSlots = Array.from({ length: 14 }, (_, i) => 8 + i); // 8 AM to 9 PM
   
   const formatTimeSlot = (hour: number) => {
@@ -46,37 +46,37 @@ export default function Availability() {
     {
       id: "1",
       name: "Dr. Jane Smith",
-      department: "Computer Science",
+      department: "Ciencias de la Computación",
       schedule: {
-        "Monday": Array(14).fill(false).map((_, i) => [1, 2, 5, 6, 7].includes(i)),
-        "Tuesday": Array(14).fill(false).map((_, i) => [3, 4, 8, 9].includes(i)),
-        "Wednesday": Array(14).fill(false).map((_, i) => [1, 2, 5, 6, 7].includes(i)),
-        "Thursday": Array(14).fill(false).map((_, i) => [3, 4, 8, 9].includes(i)),
-        "Friday": Array(14).fill(false).map((_, i) => [10, 11].includes(i)),
+        "Lunes": Array(14).fill(false).map((_, i) => [1, 2, 5, 6, 7].includes(i)),
+        "Martes": Array(14).fill(false).map((_, i) => [3, 4, 8, 9].includes(i)),
+        "Miércoles": Array(14).fill(false).map((_, i) => [1, 2, 5, 6, 7].includes(i)),
+        "Jueves": Array(14).fill(false).map((_, i) => [3, 4, 8, 9].includes(i)),
+        "Viernes": Array(14).fill(false).map((_, i) => [10, 11].includes(i)),
       }
     },
     {
       id: "2",
       name: "Prof. Michael Johnson",
-      department: "Business",
+      department: "Negocios",
       schedule: {
-        "Monday": Array(14).fill(false).map((_, i) => [3, 4, 5].includes(i)),
-        "Tuesday": Array(14).fill(false).map((_, i) => [3, 4, 5, 10, 11].includes(i)),
-        "Wednesday": Array(14).fill(false).map((_, i) => [3, 4, 5].includes(i)),
-        "Thursday": Array(14).fill(false).map((_, i) => [3, 4, 5, 10, 11].includes(i)),
-        "Friday": Array(14).fill(false).map((_, i) => [8, 9].includes(i)),
+        "Lunes": Array(14).fill(false).map((_, i) => [3, 4, 5].includes(i)),
+        "Martes": Array(14).fill(false).map((_, i) => [3, 4, 5, 10, 11].includes(i)),
+        "Miércoles": Array(14).fill(false).map((_, i) => [3, 4, 5].includes(i)),
+        "Jueves": Array(14).fill(false).map((_, i) => [3, 4, 5, 10, 11].includes(i)),
+        "Viernes": Array(14).fill(false).map((_, i) => [8, 9].includes(i)),
       }
     },
     {
       id: "3",
       name: "Dr. Sarah Williams",
-      department: "Mathematics",
+      department: "Matemáticas",
       schedule: {
-        "Monday": Array(14).fill(false).map((_, i) => [6, 7, 8].includes(i)),
-        "Tuesday": Array(14).fill(false).map((_, i) => [1, 2, 3, 8, 9].includes(i)),
-        "Wednesday": Array(14).fill(false).map((_, i) => [6, 7, 8].includes(i)),
-        "Thursday": Array(14).fill(false).map((_, i) => [1, 2, 3, 8, 9].includes(i)),
-        "Friday": Array(14).fill(false).map((_, i) => [4, 5, 6].includes(i)),
+        "Lunes": Array(14).fill(false).map((_, i) => [6, 7, 8].includes(i)),
+        "Martes": Array(14).fill(false).map((_, i) => [1, 2, 3, 8, 9].includes(i)),
+        "Miércoles": Array(14).fill(false).map((_, i) => [6, 7, 8].includes(i)),
+        "Jueves": Array(14).fill(false).map((_, i) => [1, 2, 3, 8, 9].includes(i)),
+        "Viernes": Array(14).fill(false).map((_, i) => [4, 5, 6].includes(i)),
       }
     }
   ];
@@ -119,8 +119,8 @@ export default function Availability() {
 
   const handleSaveAvailability = () => {
     toast({
-      title: "Availability Saved",
-      description: `Availability for ${currentFaculty?.name} has been updated.`,
+      title: "Disponibilidad Guardada",
+      description: `La disponibilidad de ${currentFaculty?.name} ha sido actualizada.`,
     });
   };
 
@@ -146,22 +146,22 @@ export default function Availability() {
     });
     
     toast({
-      title: isAdding ? "All Time Slots Selected" : "All Time Slots Cleared",
-      description: `Availability for ${currentFaculty?.name} has been updated.`,
+      title: isAdding ? "Todos los Horarios Seleccionados" : "Todos los Horarios Desmarcados",
+      description: `La disponibilidad de ${currentFaculty?.name} ha sido actualizada.`,
     });
   };
 
   return (
     <div className="space-y-6 animate-fade-in">
       <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold">Faculty Availability</h1>
+        <h1 className="text-3xl font-bold">Disponibilidad de Docentes</h1>
       </div>
       
       <div className="flex flex-col md:flex-row gap-4">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Search faculty..."
+            placeholder="Buscar docentes..."
             className="pl-10"
             value={searchQuery}
             onChange={handleSearch}
@@ -170,15 +170,15 @@ export default function Availability() {
         <Select defaultValue="all">
           <SelectTrigger className="w-full md:w-[200px]">
             <Filter className="mr-2 h-4 w-4" />
-            <SelectValue placeholder="Department" />
+            <SelectValue placeholder="Departamento" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Departments</SelectItem>
-            <SelectItem value="computer-science">Computer Science</SelectItem>
-            <SelectItem value="business">Business</SelectItem>
-            <SelectItem value="mathematics">Mathematics</SelectItem>
-            <SelectItem value="engineering">Engineering</SelectItem>
-            <SelectItem value="english">English</SelectItem>
+            <SelectItem value="all">Todos los Departamentos</SelectItem>
+            <SelectItem value="computer-science">Ciencias de la Computación</SelectItem>
+            <SelectItem value="business">Negocios</SelectItem>
+            <SelectItem value="mathematics">Matemáticas</SelectItem>
+            <SelectItem value="engineering">Ingeniería</SelectItem>
+            <SelectItem value="english">Inglés</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -186,9 +186,9 @@ export default function Availability() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <Card className="lg:col-span-1">
           <CardHeader>
-            <CardTitle>Faculty List</CardTitle>
+            <CardTitle>Lista de Docentes</CardTitle>
             <CardDescription>
-              Select a faculty member to manage their availability
+              Seleccione un docente para gestionar su disponibilidad
             </CardDescription>
           </CardHeader>
           <CardContent className="p-0">
@@ -219,17 +219,17 @@ export default function Availability() {
               <div>
                 <CardTitle>{currentFaculty?.name}</CardTitle>
                 <CardDescription>
-                  {currentFaculty?.department} • Manage availability schedule
+                  {currentFaculty?.department} • Gestionar horario de disponibilidad
                 </CardDescription>
               </div>
               <div className="flex gap-2">
                 <Button variant="outline" size="sm" onClick={() => handleBulkToggle(false)}>
                   <X className="h-4 w-4 mr-2" />
-                  Clear All
+                  Borrar Todo
                 </Button>
                 <Button variant="outline" size="sm" onClick={() => handleBulkToggle(true)}>
                   <Check className="h-4 w-4 mr-2" />
-                  Select All
+                  Seleccionar Todo
                 </Button>
               </div>
             </div>
@@ -239,9 +239,9 @@ export default function Availability() {
               <div className="border rounded-md overflow-auto">
                 <div className="grid grid-cols-[auto_repeat(5,1fr)]">
                   <div className="bg-muted/50 border-b border-r p-3 font-medium">
-                    Time
+                    Hora
                   </div>
-                  {daysOfWeek.map((day) => (
+                  {diasDeSemana.map((day) => (
                     <div key={day} className="bg-muted/50 border-b last:border-r-0 border-r p-3 text-center font-medium">
                       {day}
                     </div>
@@ -253,7 +253,7 @@ export default function Availability() {
                         {formatTimeSlot(hour)}
                       </div>
                       
-                      {daysOfWeek.map((day) => (
+                      {diasDeSemana.map((day) => (
                         <div
                           key={`${day}-${hour}`}
                           className={cn(
@@ -278,13 +278,13 @@ export default function Availability() {
               </div>
             ) : (
               <div className="text-center py-8 text-muted-foreground">
-                Select a faculty member from the list
+                Seleccione un docente de la lista
               </div>
             )}
           </CardContent>
           {currentFaculty && (
             <div className="px-6 py-4 border-t">
-              <Button onClick={handleSaveAvailability}>Save Availability</Button>
+              <Button onClick={handleSaveAvailability}>Guardar Disponibilidad</Button>
             </div>
           )}
         </Card>

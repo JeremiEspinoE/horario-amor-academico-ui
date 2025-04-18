@@ -43,7 +43,7 @@ export default function Faculty() {
       id: "1", 
       name: "Dr. Jane Smith", 
       email: "jane.smith@school.edu", 
-      department: "Computer Science", 
+      department: "Ciencias de la Computación", 
       phone: "(555) 123-4567", 
       status: "active",
       maxHours: 18 
@@ -52,7 +52,7 @@ export default function Faculty() {
       id: "2", 
       name: "Prof. Michael Johnson", 
       email: "michael.johnson@school.edu", 
-      department: "Business", 
+      department: "Negocios", 
       phone: "(555) 234-5678", 
       status: "active",
       maxHours: 15 
@@ -61,7 +61,7 @@ export default function Faculty() {
       id: "3", 
       name: "Dr. Sarah Williams", 
       email: "sarah.williams@school.edu", 
-      department: "Mathematics", 
+      department: "Matemáticas", 
       phone: "(555) 345-6789", 
       status: "active",
       maxHours: 18 
@@ -70,7 +70,7 @@ export default function Faculty() {
       id: "4", 
       name: "Prof. Robert Brown", 
       email: "robert.brown@school.edu", 
-      department: "Engineering", 
+      department: "Ingeniería", 
       phone: "(555) 456-7890", 
       status: "on-leave",
       maxHours: 0 
@@ -79,7 +79,7 @@ export default function Faculty() {
       id: "5", 
       name: "Dr. Emily Davis", 
       email: "emily.davis@school.edu", 
-      department: "English", 
+      department: "Inglés", 
       phone: "(555) 567-8901", 
       status: "active",
       maxHours: 12 
@@ -91,7 +91,7 @@ export default function Faculty() {
   const [newFaculty, setNewFaculty] = useState<Omit<Faculty, "id">>({
     name: "",
     email: "",
-    department: "Computer Science",
+    department: "Ciencias de la Computación",
     phone: "",
     status: "active",
     maxHours: 18
@@ -135,8 +135,8 @@ export default function Faculty() {
   const handleAddFaculty = () => {
     if (!newFaculty.name || !newFaculty.email) {
       toast({
-        title: "Missing Information",
-        description: "Please provide name and email",
+        title: "Información Faltante",
+        description: "Por favor proporcione nombre y correo electrónico",
         variant: "destructive"
       });
       return;
@@ -149,23 +149,23 @@ export default function Faculty() {
     setNewFaculty({
       name: "",
       email: "",
-      department: "Computer Science",
+      department: "Ciencias de la Computación",
       phone: "",
       status: "active",
       maxHours: 18
     });
     
     toast({
-      title: "Success",
-      description: "Faculty member added successfully"
+      title: "Éxito",
+      description: "Docente añadido correctamente"
     });
   };
   
   const handleDeleteFaculty = (id: string) => {
     setFaculty(prev => prev.filter(f => f.id !== id));
     toast({
-      title: "Faculty Removed",
-      description: "Faculty member has been removed",
+      title: "Docente Eliminado",
+      description: "El docente ha sido eliminado",
       variant: "destructive"
     });
   };
@@ -173,26 +173,26 @@ export default function Faculty() {
   return (
     <div className="space-y-6 animate-fade-in">
       <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold">Faculty Management</h1>
+        <h1 className="text-3xl font-bold">Gestión de Docentes</h1>
         <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
           <DialogTrigger asChild>
             <Button>
               <Plus className="mr-2 h-4 w-4" />
-              Add Faculty
+              Añadir Docente
             </Button>
           </DialogTrigger>
           <DialogContent className="sm:max-w-md">
             <DialogHeader>
-              <DialogTitle>Add New Faculty</DialogTitle>
+              <DialogTitle>Añadir Nuevo Docente</DialogTitle>
               <DialogDescription>
-                Enter the details for the new faculty member.
+                Ingrese los detalles del nuevo docente.
               </DialogDescription>
             </DialogHeader>
             
             <div className="grid gap-4 py-4">
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="name" className="text-right">
-                  Name
+                  Nombre
                 </Label>
                 <Input
                   id="name"
@@ -204,7 +204,7 @@ export default function Faculty() {
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="email" className="text-right">
-                  Email
+                  Correo
                 </Label>
                 <Input
                   id="email"
@@ -217,32 +217,32 @@ export default function Faculty() {
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="department" className="text-right">
-                  Department
+                  Departamento
                 </Label>
                 <Select 
                   value={newFaculty.department} 
                   onValueChange={handleDepartmentChange}
                 >
                   <SelectTrigger className="col-span-3">
-                    <SelectValue placeholder="Select department" />
+                    <SelectValue placeholder="Seleccionar departamento" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectGroup>
-                      <SelectLabel>Departments</SelectLabel>
-                      <SelectItem value="Computer Science">Computer Science</SelectItem>
-                      <SelectItem value="Business">Business</SelectItem>
-                      <SelectItem value="Mathematics">Mathematics</SelectItem>
-                      <SelectItem value="Engineering">Engineering</SelectItem>
-                      <SelectItem value="English">English</SelectItem>
-                      <SelectItem value="Physics">Physics</SelectItem>
-                      <SelectItem value="Chemistry">Chemistry</SelectItem>
+                      <SelectLabel>Departamentos</SelectLabel>
+                      <SelectItem value="Ciencias de la Computación">Ciencias de la Computación</SelectItem>
+                      <SelectItem value="Negocios">Negocios</SelectItem>
+                      <SelectItem value="Matemáticas">Matemáticas</SelectItem>
+                      <SelectItem value="Ingeniería">Ingeniería</SelectItem>
+                      <SelectItem value="Inglés">Inglés</SelectItem>
+                      <SelectItem value="Física">Física</SelectItem>
+                      <SelectItem value="Química">Química</SelectItem>
                     </SelectGroup>
                   </SelectContent>
                 </Select>
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="phone" className="text-right">
-                  Phone
+                  Teléfono
                 </Label>
                 <Input
                   id="phone"
@@ -254,25 +254,25 @@ export default function Faculty() {
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="status" className="text-right">
-                  Status
+                  Estado
                 </Label>
                 <Select 
                   value={newFaculty.status} 
                   onValueChange={handleStatusChange}
                 >
                   <SelectTrigger className="col-span-3">
-                    <SelectValue placeholder="Select status" />
+                    <SelectValue placeholder="Seleccionar estado" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="active">Active</SelectItem>
-                    <SelectItem value="on-leave">On Leave</SelectItem>
+                    <SelectItem value="active">Activo</SelectItem>
+                    <SelectItem value="on-leave">De Permiso</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
               {newFaculty.status === "active" && (
                 <div className="grid grid-cols-4 items-center gap-4">
                   <Label htmlFor="maxHours" className="text-right">
-                    Max Hours
+                    Horas Máx.
                   </Label>
                   <Input
                     id="maxHours"
@@ -288,10 +288,10 @@ export default function Faculty() {
             
             <DialogFooter>
               <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>
-                Cancel
+                Cancelar
               </Button>
               <Button onClick={handleAddFaculty}>
-                Add Faculty
+                Añadir Docente
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -302,7 +302,7 @@ export default function Faculty() {
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Search faculty..."
+            placeholder="Buscar docentes..."
             className="pl-10"
             value={searchQuery}
             onChange={handleSearch}
@@ -311,15 +311,15 @@ export default function Faculty() {
         <Select defaultValue="all">
           <SelectTrigger className="w-full sm:w-[200px]">
             <Filter className="mr-2 h-4 w-4" />
-            <SelectValue placeholder="Department" />
+            <SelectValue placeholder="Departamento" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Departments</SelectItem>
-            <SelectItem value="computer-science">Computer Science</SelectItem>
-            <SelectItem value="business">Business</SelectItem>
-            <SelectItem value="mathematics">Mathematics</SelectItem>
-            <SelectItem value="engineering">Engineering</SelectItem>
-            <SelectItem value="english">English</SelectItem>
+            <SelectItem value="all">Todos los Departamentos</SelectItem>
+            <SelectItem value="computer-science">Ciencias de la Computación</SelectItem>
+            <SelectItem value="business">Negocios</SelectItem>
+            <SelectItem value="mathematics">Matemáticas</SelectItem>
+            <SelectItem value="engineering">Ingeniería</SelectItem>
+            <SelectItem value="english">Inglés</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -328,13 +328,13 @@ export default function Faculty() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Name</TableHead>
-              <TableHead>Department</TableHead>
-              <TableHead className="hidden md:table-cell">Email</TableHead>
-              <TableHead className="hidden md:table-cell">Phone</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Max Hours</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
+              <TableHead>Nombre</TableHead>
+              <TableHead>Departamento</TableHead>
+              <TableHead className="hidden md:table-cell">Correo</TableHead>
+              <TableHead className="hidden md:table-cell">Teléfono</TableHead>
+              <TableHead>Estado</TableHead>
+              <TableHead>Horas Máx.</TableHead>
+              <TableHead className="text-right">Acciones</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -350,12 +350,12 @@ export default function Faculty() {
                       {f.status === "active" ? (
                         <>
                           <div className="h-2 w-2 bg-green-500 rounded-full mr-2" />
-                          <span>Active</span>
+                          <span>Activo</span>
                         </>
                       ) : (
                         <>
                           <div className="h-2 w-2 bg-amber-500 rounded-full mr-2" />
-                          <span>On Leave</span>
+                          <span>De Permiso</span>
                         </>
                       )}
                     </div>
@@ -366,28 +366,28 @@ export default function Faculty() {
                       <DropdownMenuTrigger asChild>
                         <Button variant="ghost" size="icon">
                           <MoreHorizontal className="h-4 w-4" />
-                          <span className="sr-only">Actions</span>
+                          <span className="sr-only">Acciones</span>
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
                         <DropdownMenuItem className="flex items-center">
                           <Edit2 className="mr-2 h-4 w-4" />
-                          <span>Edit</span>
+                          <span>Editar</span>
                         </DropdownMenuItem>
                         <DropdownMenuItem className="flex items-center">
                           <User className="mr-2 h-4 w-4" />
-                          <span>View Profile</span>
+                          <span>Ver Perfil</span>
                         </DropdownMenuItem>
                         <DropdownMenuItem className="flex items-center">
                           <MailIcon className="mr-2 h-4 w-4" />
-                          <span>Send Email</span>
+                          <span>Enviar Correo</span>
                         </DropdownMenuItem>
                         <DropdownMenuItem 
                           className="flex items-center text-destructive focus:text-destructive"
                           onClick={() => handleDeleteFaculty(f.id)}
                         >
                           <Trash2 className="mr-2 h-4 w-4" />
-                          <span>Delete</span>
+                          <span>Eliminar</span>
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
@@ -397,7 +397,7 @@ export default function Faculty() {
             ) : (
               <TableRow>
                 <TableCell colSpan={7} className="text-center py-6 text-muted-foreground">
-                  No faculty found matching your search criteria.
+                  No se encontraron docentes que coincidan con su criterio de búsqueda.
                 </TableCell>
               </TableRow>
             )}
