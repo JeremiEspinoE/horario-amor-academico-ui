@@ -204,9 +204,9 @@ export default function Settings() {
         <TabsContent value="room-types" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>Tipos de Aula e Instalaciones</CardTitle>
+              <CardTitle>Tipos de Aula</CardTitle>
               <CardDescription>
-                Configura tipos de aulas y sus capacidades
+                Configura tipos de aulas y su cantidad
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -215,7 +215,7 @@ export default function Settings() {
                   <thead>
                     <tr className="bg-muted/50">
                       <th className="text-left p-3 border-b">Tipo de Aula</th>
-                      <th className="text-left p-3 border-b">Capacidad</th>
+                      <th className="text-left p-3 border-b">Cantidad</th>
                       <th className="text-left p-3 border-b">Instalaciones</th>
                       <th className="text-left p-3 border-b">Acciones</th>
                     </tr>
@@ -268,7 +268,7 @@ export default function Settings() {
                         <Input placeholder="Agregar nuevo tipo..." />
                       </td>
                       <td className="p-3">
-                        <Input type="number" placeholder="Capacidad" />
+                        <Input type="number" placeholder="Cantidad" />
                       </td>
                       <td className="p-3">
                         <Input placeholder="Instalaciones (separadas por comas)" />
