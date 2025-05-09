@@ -7,6 +7,7 @@ import {
   ChevronRight,
   Download,
   Filter,
+  Info,
   Search,
   TestTube,
   X,
@@ -40,6 +41,8 @@ import {
 } from "@/components/ui/alert-dialog";
 import { ExcelExport } from "@/components/Schedule/ExcelExport";
 import { useAppContext } from "@/context/AppContext";
+import { HierarchicalSelect, Institution, Career, Subject } from "@/components/Hierarchical/HierarchicalSelect";
+import { useToast } from "@/hooks/use-toast";
 
 type Course = {
   code: string;
@@ -212,6 +215,41 @@ export default function Schedule() {
   const [hasErrors, setHasErrors] = useState(true); // Para el botón de publicación
   const { isTestMode } = useAppContext();
 
+  // Datos de ejemplo para el selector jerárquico
+  const [institutions] = useState<Institution[]>([
+    { id: "inst1", name: "Universidad Central" },
+    { id: "inst2", name: "Instituto Tecnológico" }
+  ]);
+  
+  const [careers] = useState<Career[]>([
+    { id: "car1", name: "Ingeniería de Software", institutionId: "inst1" },
+    { id: "car2", name: "Ciencias de la Computación", institutionId: "inst1" },
+    { id: "car3", name: "Administración de Empresas", institutionId: "inst2" },
+    { id: "car4", name: "Marketing Digital", institutionId: "inst2" }
+  ]);
+  
+  const [subjects] = useState<Subject[]>([
+    { id: "sub1", code: "CS101", name: "Introducción a la Programación", careerId: "car1", hoursPerWeek: 6, requiredRoomType: "Laboratorio" },
+    { id: "sub2", code: "CS201", name: "Estructura de Datos", careerId: "car1", hoursPerWeek: 4, requiredRoomType: "Laboratorio" },
+    { id: "sub3", code: "MATH101", name: "Cálculo I", careerId: "car1", hoursPerWeek: 6 },
+    { id: "sub4", code: "MATH201", name: "Cálculo II", careerId: "car2", hoursPerWeek: 4, specialty: "Matemáticas" },
+    { id: "sub5", code: "BUS101", name: "Introducción a los Negocios", careerId: "car3", hoursPerWeek: 4, specialty: "Negocios" },
+    { id: "sub6", code: "MKT101", name: "Fundamentos de Marketing", careerId: "car4", hoursPerWeek: 4 }
+  ]);
+  
+  // Estado para la selección jerárquica
+  const [currentSelection, setCurrentSelection] = useState<{
+    institution: Institution | null;
+    career: Career | null;
+    subject: Subject | null;
+  }>({
+    institution: null,
+    career: null,
+    subject: null
+  });
+
+  const { toast } = useToast();
+
   // Verificar si hay errores en el horario (conflictos)
   useEffect(() => {
     let conflicts = false;
@@ -235,6 +273,15 @@ export default function Schedule() {
 
   // Generar horario automáticamente (placeholder)
   const generateAutomaticSchedule = () => {
+    if (!currentSelection.career) {
+      toast({
+        title: "Selección incompleta",
+        description: "Debe seleccionar una carrera antes de generar el horario automáticamente.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
     // En un caso real, aquí tendríamos un algoritmo complejo
     // Por ahora, solo simularemos que limpia los conflictos
     
@@ -251,6 +298,11 @@ export default function Schedule() {
     }
     
     setSchedule(newSchedule);
+
+    toast({
+      title: "Horario generado",
+      description: `Horario automático generado para ${currentSelection.career.name}`,
+    });
   };
 
   // Preparar datos para exportar a Excel
@@ -299,6 +351,9 @@ export default function Schedule() {
     return filteredSch;
   };
 
+  // Verificar si se ha seleccionado una carrera para habilitar funciones
+  const isScheduleEnabled = currentSelection.career !== null;
+
   return (
     <div className="space-y-6 animate-fade-in">
       <div className="flex justify-between items-center">
@@ -318,7 +373,21 @@ export default function Schedule() {
           {useAppContext().userRole === "administrativo" && (
             <AlertDialog>
               <AlertDialogTrigger asChild>
-                <Button variant="outline">
+                <Button 
+                  variant="outline" 
+                  disabled={!isScheduleEnabled}
+                  className="relative"
+                  onClick={(e) => {
+                    if (!isScheduleEnabled) {
+                      e.preventDefault();
+                      toast({
+                        title: "Selección requerida",
+                        description: "Seleccione una institución y una carrera antes de generar el horario",
+                        variant: "destructive"
+                      });
+                    }
+                  }}
+                >
                   <TestTube className="mr-2 h-4 w-4" />
                   Generar automáticamente
                 </Button>
@@ -345,7 +414,20 @@ export default function Schedule() {
           
           <AlertDialog>
             <AlertDialogTrigger asChild>
-              <Button variant="outline" disabled={hasErrors && !isTestMode}>
+              <Button 
+                variant="outline" 
+                disabled={(hasErrors && !isTestMode) || !isScheduleEnabled}
+                onClick={(e) => {
+                  if (!isScheduleEnabled) {
+                    e.preventDefault();
+                    toast({
+                      title: "Selección requerida",
+                      description: "Seleccione una institución y una carrera antes de publicar el horario",
+                      variant: "destructive"
+                    });
+                  }
+                }}
+              >
                 <CalendarIcon className="mr-2 h-4 w-4" />
                 Publicar Horario
               </Button>
@@ -382,14 +464,31 @@ export default function Schedule() {
         </div>
       </div>
 
+      {/* Selector Jerárquico */}
+      <div className="mb-6">
+        <HierarchicalSelect
+          institutions={institutions}
+          careers={careers}
+          subjects={subjects}
+          onSelectionChange={setCurrentSelection}
+        />
+      </div>
+
+      {!isScheduleEnabled && (
+        <div className="bg-muted/70 border rounded-md p-4 mb-4 flex items-center gap-2">
+          <Info className="h-5 w-5 text-muted-foreground" />
+          <p className="text-muted-foreground">Seleccione una institución y carrera para habilitar el diseño del horario.</p>
+        </div>
+      )}
+
       <div className="flex flex-col md:flex-row gap-4">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input placeholder="Buscar en horario..." className="pl-10" onChange={handleSearch} />
+          <Input placeholder="Buscar en horario..." className="pl-10" onChange={handleSearch} disabled={!isScheduleEnabled} />
         </div>
         <Popover open={showFilters} onOpenChange={setShowFilters}>
           <PopoverTrigger asChild>
-            <Button variant="outline" className="w-full md:w-[150px]">
+            <Button variant="outline" className="w-full md:w-[150px]" disabled={!isScheduleEnabled}>
               <Filter className="mr-2 h-4 w-4" />
               Filtros
             </Button>
@@ -464,7 +563,7 @@ export default function Schedule() {
         </Popover>
       </div>
 
-      <div className="border rounded-md overflow-auto">
+      <div className={cn("border rounded-md overflow-auto", !isScheduleEnabled && "opacity-50 pointer-events-none")}>
         <div className="grid grid-cols-[auto_repeat(5,1fr)] min-w-[800px]">
           <div className="bg-muted/50 border-b border-r p-3 font-medium">Hora</div>
           {daysOfWeek.map((day) => (
