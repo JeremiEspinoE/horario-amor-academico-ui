@@ -1,11 +1,12 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Check,
   ChevronDown,
   Filter,
   Search,
   X,
+  FileSpreadsheet,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -25,11 +26,14 @@ import {
 } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
+import { ExcelActions } from "@/components/Excel/ExcelActions";
+import { useAppContext } from "@/context/AppContext";
 
 type FacultyAvailability = {
   id: string;
   name: string;
   department: string;
+  email?: string;
   schedule: Record<string, boolean[]>;
 };
 
@@ -47,6 +51,7 @@ export default function Availability() {
       id: "1",
       name: "Dr. Jane Smith",
       department: "Ciencias de la Computación",
+      email: "jane.smith@school.edu",
       schedule: {
         "Lunes": Array(14).fill(false).map((_, i) => [1, 2, 5, 6, 7].includes(i)),
         "Martes": Array(14).fill(false).map((_, i) => [3, 4, 8, 9].includes(i)),
@@ -59,6 +64,7 @@ export default function Availability() {
       id: "2",
       name: "Prof. Michael Johnson",
       department: "Negocios",
+      email: "michael.johnson@school.edu",
       schedule: {
         "Lunes": Array(14).fill(false).map((_, i) => [3, 4, 5].includes(i)),
         "Martes": Array(14).fill(false).map((_, i) => [3, 4, 5, 10, 11].includes(i)),
@@ -71,6 +77,7 @@ export default function Availability() {
       id: "3",
       name: "Dr. Sarah Williams",
       department: "Matemáticas",
+      email: "sarah.williams@school.edu",
       schedule: {
         "Lunes": Array(14).fill(false).map((_, i) => [6, 7, 8].includes(i)),
         "Martes": Array(14).fill(false).map((_, i) => [1, 2, 3, 8, 9].includes(i)),
@@ -82,9 +89,20 @@ export default function Availability() {
   ];
 
   const [facultyData, setFacultyData] = useState<FacultyAvailability[]>(initialFacultyData);
-  const [selectedFaculty, setSelectedFaculty] = useState<string>(initialFacultyData[0].id);
+  const [selectedFaculty, setSelectedFaculty] = useState<string>("");
   const [searchQuery, setSearchQuery] = useState("");
   const { toast } = useToast();
+  const { userRole } = useAppContext();
+
+  useEffect(() => {
+    // Si es docente, auto-seleccionarlo
+    if (userRole === "docente") {
+      // Simulamos que el docente actual es el primero
+      setSelectedFaculty(initialFacultyData[0].id);
+    } else if (initialFacultyData.length > 0) {
+      setSelectedFaculty(initialFacultyData[0].id);
+    }
+  }, [userRole]);
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
@@ -96,6 +114,75 @@ export default function Availability() {
   );
 
   const currentFaculty = facultyData.find(faculty => faculty.id === selectedFaculty);
+
+  // Preparar datos para Excel
+  const prepareDataForExcel = () => {
+    if (!currentFaculty) return [];
+    
+    const excelData: any[] = [];
+    
+    diasDeSemana.forEach(day => {
+      timeSlots.forEach((hour, index) => {
+        excelData.push({
+          Día: day,
+          Hora: formatTimeSlot(hour),
+          Disponible: currentFaculty.schedule[day][index] ? "Sí" : "No"
+        });
+      });
+    });
+    
+    return excelData;
+  };
+
+  // Importar datos desde Excel
+  const handleExcelImport = (data: any[]) => {
+    if (!currentFaculty || !data.length) return;
+    
+    try {
+      const updatedSchedule = { ...currentFaculty.schedule };
+      
+      data.forEach(row => {
+        const day = row.Día;
+        const hourStr = row.Hora;
+        const isAvailable = row.Disponible === "Sí" || row.Disponible === true;
+        
+        // Encontrar el índice de la hora
+        const timeMatch = hourStr.match(/(\d+):00\s*(AM|PM)/);
+        if (timeMatch && diasDeSemana.includes(day)) {
+          let hour = parseInt(timeMatch[1]);
+          const period = timeMatch[2];
+          
+          // Convertir a formato 24 horas
+          if (period === "PM" && hour < 12) hour += 12;
+          if (period === "AM" && hour === 12) hour = 0;
+          
+          // Obtener el índice
+          const timeIndex = hour - 8; // Restamos 8 porque empezamos desde las 8 AM
+          
+          if (timeIndex >= 0 && timeIndex < 14) {
+            updatedSchedule[day][timeIndex] = isAvailable;
+          }
+        }
+      });
+      
+      // Actualizar el docente con el nuevo horario
+      setFacultyData(prevData =>
+        prevData.map(faculty =>
+          faculty.id === currentFaculty.id
+            ? { ...faculty, schedule: updatedSchedule }
+            : faculty
+        )
+      );
+      
+    } catch (error) {
+      console.error("Error al procesar datos importados:", error);
+      toast({
+        title: "Error al importar",
+        description: "El formato del archivo no es compatible",
+        variant: "destructive"
+      });
+    }
+  };
 
   const toggleAvailability = (day: string, timeIndex: number) => {
     if (!currentFaculty) return;
@@ -154,66 +241,84 @@ export default function Availability() {
   return (
     <div className="space-y-6 animate-fade-in">
       <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold">Disponibilidad de Docentes</h1>
+        <h1 className="text-3xl font-bold">
+          {userRole === "docente" ? "Mi Disponibilidad" : "Disponibilidad de Docentes"}
+        </h1>
+        
+        {/* Mostrar acciones de Excel solo si hay un docente seleccionado */}
+        {currentFaculty && (
+          <ExcelActions 
+            data={prepareDataForExcel()} 
+            onImport={handleExcelImport} 
+            filename={`disponibilidad_${currentFaculty.name.replace(/\s+/g, '_')}`}
+            sheetName="Disponibilidad"
+          />
+        )}
       </div>
       
-      <div className="flex flex-col md:flex-row gap-4">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Buscar docentes..."
-            className="pl-10"
-            value={searchQuery}
-            onChange={handleSearch}
-          />
+      {/* Solo mostrar búsqueda y filtros si es administrador */}
+      {userRole === "administrativo" && (
+        <div className="flex flex-col md:flex-row gap-4">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Buscar docentes..."
+              className="pl-10"
+              value={searchQuery}
+              onChange={handleSearch}
+            />
+          </div>
+          <Select defaultValue="all">
+            <SelectTrigger className="w-full md:w-[200px]">
+              <Filter className="mr-2 h-4 w-4" />
+              <SelectValue placeholder="Departamento" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todos los Departamentos</SelectItem>
+              <SelectItem value="computer-science">Ciencias de la Computación</SelectItem>
+              <SelectItem value="business">Negocios</SelectItem>
+              <SelectItem value="mathematics">Matemáticas</SelectItem>
+              <SelectItem value="engineering">Ingeniería</SelectItem>
+              <SelectItem value="english">Inglés</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
-        <Select defaultValue="all">
-          <SelectTrigger className="w-full md:w-[200px]">
-            <Filter className="mr-2 h-4 w-4" />
-            <SelectValue placeholder="Departamento" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Todos los Departamentos</SelectItem>
-            <SelectItem value="computer-science">Ciencias de la Computación</SelectItem>
-            <SelectItem value="business">Negocios</SelectItem>
-            <SelectItem value="mathematics">Matemáticas</SelectItem>
-            <SelectItem value="engineering">Ingeniería</SelectItem>
-            <SelectItem value="english">Inglés</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
+      )}
       
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <Card className="lg:col-span-1">
-          <CardHeader>
-            <CardTitle>Lista de Docentes</CardTitle>
-            <CardDescription>
-              Seleccione un docente para gestionar su disponibilidad
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="p-0">
-            <div className="space-y-1">
-              {filteredFaculty.map((faculty) => (
-                <Button
-                  key={faculty.id}
-                  variant="ghost"
-                  className={cn(
-                    "w-full justify-start px-4 py-2 h-auto text-left",
-                    selectedFaculty === faculty.id && "bg-muted"
-                  )}
-                  onClick={() => setSelectedFaculty(faculty.id)}
-                >
-                  <div className="flex flex-col items-start">
-                    <span className="text-base font-medium">{faculty.name}</span>
-                    <span className="text-xs text-muted-foreground">{faculty.department}</span>
-                  </div>
-                </Button>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+        {/* Solo mostrar lista de docentes si es administrador */}
+        {userRole === "administrativo" && (
+          <Card className="lg:col-span-1">
+            <CardHeader>
+              <CardTitle>Lista de Docentes</CardTitle>
+              <CardDescription>
+                Seleccione un docente para gestionar su disponibilidad
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="p-0">
+              <div className="space-y-1">
+                {filteredFaculty.map((faculty) => (
+                  <Button
+                    key={faculty.id}
+                    variant="ghost"
+                    className={cn(
+                      "w-full justify-start px-4 py-2 h-auto text-left",
+                      selectedFaculty === faculty.id && "bg-muted"
+                    )}
+                    onClick={() => setSelectedFaculty(faculty.id)}
+                  >
+                    <div className="flex flex-col items-start">
+                      <span className="text-base font-medium">{faculty.name}</span>
+                      <span className="text-xs text-muted-foreground">{faculty.department}</span>
+                    </div>
+                  </Button>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
         
-        <Card className="lg:col-span-2">
+        <Card className={userRole === "administrativo" ? "lg:col-span-2" : "lg:col-span-3"}>
           <CardHeader>
             <div className="flex justify-between">
               <div>

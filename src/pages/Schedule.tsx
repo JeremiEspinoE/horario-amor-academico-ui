@@ -1,6 +1,6 @@
-
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
+  AlertTriangle,
   CalendarIcon,
   Check,
   ChevronLeft,
@@ -8,6 +8,7 @@ import {
   Download,
   Filter,
   Search,
+  TestTube,
   X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -37,6 +38,8 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { ExcelExport } from "@/components/Schedule/ExcelExport";
+import { useAppContext } from "@/context/AppContext";
 
 type Course = {
   code: string;
@@ -70,7 +73,7 @@ export default function Schedule() {
     Viernes: Array.from({ length: 14 }, () => ({ courses: [] })),
   };
 
-  // Add some sample courses
+  // Añadir algunos cursos de ejemplo
   initialSchedule.Lunes[1].courses.push({
     code: "CS101",
     name: "Intro a Programación",
@@ -206,9 +209,73 @@ export default function Schedule() {
   const [currentPeriod, setCurrentPeriod] = useState("Primavera 2025");
   const [showFilters, setShowFilters] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [hasErrors, setHasErrors] = useState(true); // Para el botón de publicación
+  const { isTestMode } = useAppContext();
+
+  // Verificar si hay errores en el horario (conflictos)
+  useEffect(() => {
+    let conflicts = false;
+    
+    for (const day in schedule) {
+      for (const slot of schedule[day]) {
+        if (slot.courses.length > 1) {
+          conflicts = true;
+          break;
+        }
+      }
+      if (conflicts) break;
+    }
+    
+    setHasErrors(conflicts);
+  }, [schedule]);
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value.toLowerCase());
+  };
+
+  // Generar horario automáticamente (placeholder)
+  const generateAutomaticSchedule = () => {
+    // En un caso real, aquí tendríamos un algoritmo complejo
+    // Por ahora, solo simularemos que limpia los conflictos
+    
+    const newSchedule = JSON.parse(JSON.stringify(schedule)) as ScheduleType;
+    
+    // Elimina conflictos colocando solo un curso por slot
+    for (const day in newSchedule) {
+      for (const slot of newSchedule[day]) {
+        if (slot.courses.length > 1) {
+          // Mantén solo el primer curso
+          slot.courses = [slot.courses[0]];
+        }
+      }
+    }
+    
+    setSchedule(newSchedule);
+  };
+
+  // Preparar datos para exportar a Excel
+  const prepareDataForExcel = () => {
+    const excelData = [];
+    
+    for (const day of daysOfWeek) {
+      for (let i = 0; i < timeSlots.length; i++) {
+        const slot = schedule[day][i];
+        if (slot.courses.length > 0) {
+          for (const course of slot.courses) {
+            excelData.push({
+              Día: day,
+              Hora: formatTimeSlot(timeSlots[i]),
+              Curso: `${course.code} - ${course.name}`,
+              Aula: course.room,
+              Docente: course.faculty,
+              Conflicto: slot.courses.length > 1 ? "Sí" : "No"
+            });
+          }
+        }
+      }
+    }
+    
+    return excelData;
   };
 
   // Filter schedule based on search query
@@ -246,9 +313,39 @@ export default function Schedule() {
               <ChevronRight className="h-4 w-4" />
             </Button>
           </div>
+          
+          {/* Botón para generar horario automático (solo para administradores) */}
+          {useAppContext().userRole === "administrativo" && (
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="outline">
+                  <TestTube className="mr-2 h-4 w-4" />
+                  Generar automáticamente
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Generar horario automático</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Esta acción intentará generar un horario automático optimizado sin conflictos.
+                    {isTestMode
+                      ? "No se preocupe, estás en modo prueba, por lo que no afectará los datos reales."
+                      : "Esta acción modificará el horario actual."}
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                  <AlertDialogAction onClick={generateAutomaticSchedule}>
+                    Generar
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          )}
+          
           <AlertDialog>
             <AlertDialogTrigger asChild>
-              <Button variant="outline">
+              <Button variant="outline" disabled={hasErrors && !isTestMode}>
                 <CalendarIcon className="mr-2 h-4 w-4" />
                 Publicar Horario
               </Button>
@@ -259,6 +356,15 @@ export default function Schedule() {
                 <AlertDialogDescription>
                   ¿Estás seguro de que deseas publicar el horario de {currentPeriod}? Esto lo hará
                   visible para todos los docentes y estudiantes.
+                  {hasErrors && (
+                    <div className="mt-2 p-2 bg-destructive/10 text-destructive rounded-md flex items-center gap-2">
+                      <AlertTriangle className="h-4 w-4" />
+                      <span>
+                        Hay conflictos en el horario que deben resolverse antes de publicar.
+                        {isTestMode && " Sin embargo, en modo prueba puedes publicar de todos modos."}
+                      </span>
+                    </div>
+                  )}
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
@@ -267,11 +373,12 @@ export default function Schedule() {
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
-
-          <Button>
-            <Download className="mr-2 h-4 w-4" />
-            Exportar
-          </Button>
+          
+          <ExcelExport 
+            data={prepareDataForExcel()} 
+            title={currentPeriod} 
+            filename={`horario_${currentPeriod.replace(/\s+/g, '_').toLowerCase()}`} 
+          />
         </div>
       </div>
 

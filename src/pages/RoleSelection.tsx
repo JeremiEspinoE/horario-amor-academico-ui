@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { UserCog, School } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -7,14 +7,25 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
+import { useAppContext } from "@/context/AppContext";
 
 export default function RoleSelection() {
   const [selectedRole, setSelectedRole] = useState<string>("");
   const navigate = useNavigate();
+  const { setUserRole } = useAppContext();
+  
+  // Comprobar si ya existe un rol guardado
+  useEffect(() => {
+    const savedRole = localStorage.getItem('userRole');
+    if (savedRole) {
+      // Si ya hay un rol guardado, ir directo al dashboard
+      navigate("/dashboard");
+    }
+  }, [navigate]);
 
   const handleContinue = () => {
     if (selectedRole) {
-      localStorage.setItem('userRole', selectedRole);
+      setUserRole(selectedRole); // Usar el contexto para establecer el rol
       navigate("/login");
     }
   };
