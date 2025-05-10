@@ -8,7 +8,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { Calendar, Clock, Building, User } from "lucide-react";
+import { Calendar, Clock, Building, User, GraduationCap } from "lucide-react";
 import { HierarchicalSelect, Institution, Career, Subject } from '@/components/Hierarchical/HierarchicalSelect';
 import { useAppContext, ClassroomType, Classroom, Section } from '@/context/AppContext';
 import { useToast } from "@/hooks/use-toast";
@@ -27,6 +27,12 @@ interface Teacher {
   specialties: string[];
 }
 
+interface Semester {
+  id: string;
+  name: string;
+  careerId: string;
+}
+
 interface ManualScheduleCreatorProps {
   institutions: Institution[];
   careers: Career[];
@@ -41,7 +47,7 @@ const ManualScheduleCreator: React.FC<ManualScheduleCreatorProps> = ({
   onScheduleCreate
 }) => {
   const { toast } = useToast();
-  const { sections, classroomTypes, classrooms } = useAppContext();
+  const { sections, classroomTypes, classrooms, semesters } = useAppContext();
   
   // Estado para la selección jerárquica
   const [currentSelection, setCurrentSelection] = useState<{
@@ -55,15 +61,19 @@ const ManualScheduleCreator: React.FC<ManualScheduleCreatorProps> = ({
   });
   
   // Estados adicionales para el formulario
+  const [selectedSemester, setSelectedSemester] = useState<string>("");
   const [selectedSection, setSelectedSection] = useState<string>("");
   const [selectedDay, setSelectedDay] = useState<string>("");
-  const [selectedHour, setSelectedHour] = useState<string>("");
+  const [selectedStartHour, setSelectedStartHour] = useState<string>("");
+  const [selectedEndHour, setSelectedEndHour] = useState<string>("");
   const [selectedClassroom, setSelectedClassroom] = useState<string>("");
   const [selectedTeacher, setSelectedTeacher] = useState<string>("");
   
   // Datos filtrados
   const [filteredSections, setFilteredSections] = useState<Section[]>([]);
+  const [filteredSemesters, setFilteredSemesters] = useState<Semester[]>([]);
   const [filteredClassrooms, setFilteredClassrooms] = useState<Classroom[]>([]);
+  const [availableEndHours, setAvailableEndHours] = useState<number[]>([]);
 
   // Datos de ejemplo de profesores
   const [teachers] = useState<Teacher[]>([
@@ -73,17 +83,37 @@ const ManualScheduleCreator: React.FC<ManualScheduleCreatorProps> = ({
     { id: "t4", name: "Dra. Ana Martínez", specialties: ["Informática"] }
   ]);
   
-  // Filtrar secciones cuando cambia la carrera seleccionada
+  // Filtrar semestres cuando cambia la carrera seleccionada
   useEffect(() => {
     if (currentSelection.career) {
-      const filtered = sections.filter(section => section.careerId === currentSelection.career!.id);
-      setFilteredSections(filtered);
+      // En un caso real, esto vendría de la base de datos
+      const filtered = semesters ? semesters.filter(semester => 
+        semester.careerId === currentSelection.career!.id
+      ) : [];
+      
+      setFilteredSemesters(filtered);
+      setSelectedSemester("");
       setSelectedSection("");
     } else {
+      setFilteredSemesters([]);
+      setSelectedSemester("");
       setFilteredSections([]);
       setSelectedSection("");
     }
-  }, [currentSelection.career, sections]);
+  }, [currentSelection.career, semesters]);
+  
+  // Filtrar secciones cuando cambia la carrera y el semestre seleccionado
+  useEffect(() => {
+    if (currentSelection.career && selectedSemester) {
+      const filtered = sections.filter(section => 
+        section.careerId === currentSelection.career!.id
+      );
+      setFilteredSections(filtered);
+    } else {
+      setFilteredSections([]);
+    }
+    setSelectedSection("");
+  }, [currentSelection.career, selectedSemester, sections]);
   
   // Filtrar aulas cuando cambia la asignatura seleccionada
   useEffect(() => {
@@ -111,6 +141,20 @@ const ManualScheduleCreator: React.FC<ManualScheduleCreatorProps> = ({
     }
   }, [currentSelection.subject, classrooms, classroomTypes]);
   
+  // Actualizar horas de fin disponibles cuando cambia la hora de inicio
+  useEffect(() => {
+    if (selectedStartHour) {
+      const startHour = parseInt(selectedStartHour);
+      const endHours = Array.from({ length: 22 - startHour }, (_, i) => startHour + i + 1)
+        .filter(hour => hour <= 22); // Limitar a 10 PM
+      setAvailableEndHours(endHours);
+      setSelectedEndHour("");
+    } else {
+      setAvailableEndHours([]);
+      setSelectedEndHour("");
+    }
+  }, [selectedStartHour]);
+  
   // Filtrar profesores con especialidad adecuada
   const getEligibleTeachers = () => {
     if (currentSelection.subject?.specialty) {
@@ -125,8 +169,8 @@ const ManualScheduleCreator: React.FC<ManualScheduleCreatorProps> = ({
   const handleCreateSchedule = () => {
     // Validar que todos los campos necesarios estén seleccionados
     if (!currentSelection.institution || !currentSelection.career || 
-        !currentSelection.subject || !selectedSection || !selectedDay || 
-        !selectedHour || !selectedClassroom || !selectedTeacher) {
+        !currentSelection.subject || !selectedSemester || !selectedSection || !selectedDay || 
+        !selectedStartHour || !selectedEndHour || !selectedClassroom || !selectedTeacher) {
       toast({
         title: "Faltan campos",
         description: "Debe completar todos los campos para crear el horario.",
@@ -135,24 +179,42 @@ const ManualScheduleCreator: React.FC<ManualScheduleCreatorProps> = ({
       return;
     }
     
-    // Crear el objeto de horario
-    const scheduleItem = {
-      code: currentSelection.subject.code,
-      name: currentSelection.subject.name,
-      day: selectedDay,
-      hour: Number(selectedHour),
-      classroom: classrooms.find(room => room.id === selectedClassroom)?.code || "",
-      classroomType: classroomTypes.find(type => 
-        type.id === classrooms.find(room => room.id === selectedClassroom)?.typeId
-      )?.name || "",
-      teacher: teachers.find(teacher => teacher.id === selectedTeacher)?.name || "",
-      section: filteredSections.find(section => section.id === selectedSection)?.name || "",
-      specialty: currentSelection.subject.specialty || "",
-      colorClass: "bg-academic-600 text-white"
-    };
+    const startHour = parseInt(selectedStartHour);
+    const endHour = parseInt(selectedEndHour);
     
-    // Notificar al componente padre
-    onScheduleCreate(scheduleItem);
+    // Validar que la hora de fin sea mayor que la de inicio
+    if (startHour >= endHour) {
+      toast({
+        title: "Error en horario",
+        description: "La hora de fin debe ser posterior a la hora de inicio.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    // Crear el objeto de horario para cada hora en el rango seleccionado
+    for (let hour = startHour; hour < endHour; hour++) {
+      const scheduleItem = {
+        code: currentSelection.subject.code,
+        name: currentSelection.subject.name,
+        day: selectedDay,
+        hour: hour,
+        classroom: classrooms.find(room => room.id === selectedClassroom)?.code || "",
+        classroomType: classroomTypes.find(type => 
+          type.id === classrooms.find(room => room.id === selectedClassroom)?.typeId
+        )?.name || "",
+        teacher: teachers.find(teacher => teacher.id === selectedTeacher)?.name || "",
+        section: filteredSections.find(section => section.id === selectedSection)?.name || "",
+        semester: filteredSemesters.find(sem => sem.id === selectedSemester)?.name || "",
+        specialty: currentSelection.subject.specialty || "",
+        colorClass: "bg-academic-600 text-white",
+        startHour: startHour,
+        endHour: endHour
+      };
+      
+      // Notificar al componente padre
+      onScheduleCreate(scheduleItem);
+    }
     
     // Mostrar mensaje de éxito
     toast({
@@ -160,12 +222,15 @@ const ManualScheduleCreator: React.FC<ManualScheduleCreatorProps> = ({
       description: `Se ha creado el horario para ${currentSelection.subject.name} exitosamente.`,
     });
     
-    // Limpiar formulario excepto la selección jerárquica básica
+    // Limpiar formulario excepto la selección jerárquica básica y semestre/sección
     setSelectedDay("");
-    setSelectedHour("");
+    setSelectedStartHour("");
+    setSelectedEndHour("");
     setSelectedClassroom("");
     setSelectedTeacher("");
   };
+  
+  const daysOfWeek = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
   
   return (
     <Card className="mb-6">
@@ -182,9 +247,30 @@ const ManualScheduleCreator: React.FC<ManualScheduleCreatorProps> = ({
           onSelectionChange={setCurrentSelection}
         />
         
-        {/* Selector de Sección */}
+        {/* Selector de Semestre */}
         {currentSelection.career && (
           <div className="grid grid-cols-[auto_1fr] items-center gap-2 pt-4">
+            <GraduationCap className="h-5 w-5 text-muted-foreground" />
+            <Select 
+              value={selectedSemester}
+              onValueChange={setSelectedSemester}
+              disabled={filteredSemesters.length === 0}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Seleccionar Semestre" />
+              </SelectTrigger>
+              <SelectContent>
+                {filteredSemesters.map(semester => (
+                  <SelectItem key={semester.id} value={semester.id}>{semester.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
+        
+        {/* Selector de Sección */}
+        {currentSelection.career && selectedSemester && (
+          <div className="grid grid-cols-[auto_1fr] items-center gap-2">
             <Building className="h-5 w-5 text-muted-foreground" />
             <Select 
               value={selectedSection}
@@ -204,7 +290,7 @@ const ManualScheduleCreator: React.FC<ManualScheduleCreatorProps> = ({
         )}
         
         {/* Selectores adicionales (solo visibles si se seleccionó asignatura) */}
-        {currentSelection.subject && (
+        {currentSelection.subject && selectedSection && (
           <>
             {/* Selector de Día */}
             <div className="grid grid-cols-[auto_1fr] items-center gap-2">
@@ -217,27 +303,46 @@ const ManualScheduleCreator: React.FC<ManualScheduleCreatorProps> = ({
                   <SelectValue placeholder="Seleccionar Día" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="Lunes">Lunes</SelectItem>
-                  <SelectItem value="Martes">Martes</SelectItem>
-                  <SelectItem value="Miércoles">Miércoles</SelectItem>
-                  <SelectItem value="Jueves">Jueves</SelectItem>
-                  <SelectItem value="Viernes">Viernes</SelectItem>
+                  {daysOfWeek.map(day => (
+                    <SelectItem key={day} value={day}>{day}</SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
             
-            {/* Selector de Hora */}
+            {/* Selector de Hora de Inicio */}
             <div className="grid grid-cols-[auto_1fr] items-center gap-2">
               <Clock className="h-5 w-5 text-muted-foreground" />
               <Select 
-                value={selectedHour}
-                onValueChange={setSelectedHour}
+                value={selectedStartHour}
+                onValueChange={setSelectedStartHour}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Seleccionar Hora" />
+                  <SelectValue placeholder="Seleccionar Hora de Inicio" />
                 </SelectTrigger>
                 <SelectContent>
                   {Array.from({ length: 14 }, (_, i) => 8 + i).map(hour => (
+                    <SelectItem key={hour} value={hour.toString()}>
+                      {`${hour % 12 || 12}:00 ${hour < 12 ? 'AM' : 'PM'}`}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            
+            {/* Selector de Hora de Fin */}
+            <div className="grid grid-cols-[auto_1fr] items-center gap-2">
+              <Clock className="h-5 w-5 text-muted-foreground" />
+              <Select 
+                value={selectedEndHour}
+                onValueChange={setSelectedEndHour}
+                disabled={availableEndHours.length === 0}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Seleccionar Hora de Fin" />
+                </SelectTrigger>
+                <SelectContent>
+                  {availableEndHours.map(hour => (
                     <SelectItem key={hour} value={hour.toString()}>
                       {`${hour % 12 || 12}:00 ${hour < 12 ? 'AM' : 'PM'}`}
                     </SelectItem>
@@ -295,7 +400,7 @@ const ManualScheduleCreator: React.FC<ManualScheduleCreatorProps> = ({
       <CardFooter>
         <Button 
           onClick={handleCreateSchedule} 
-          disabled={!currentSelection.subject || !selectedSection || !selectedDay || !selectedHour || !selectedClassroom || !selectedTeacher}
+          disabled={!currentSelection.subject || !selectedSemester || !selectedSection || !selectedDay || !selectedStartHour || !selectedEndHour || !selectedClassroom || !selectedTeacher}
         >
           Crear horario manual
         </Button>

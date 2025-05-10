@@ -24,7 +24,10 @@ interface ScheduleFiltersProps {
   setShowFilters: (show: boolean) => void;
   selectedSectionFilter: string;
   setSelectedSectionFilter: (section: string) => void;
+  selectedSemesterFilter: string;
+  setSelectedSemesterFilter: (semester: string) => void;
   availableSections: string[];
+  availableSemesters: string[];
   userRole: string | null;
 }
 
@@ -35,7 +38,10 @@ const ScheduleFilters: React.FC<ScheduleFiltersProps> = ({
   setShowFilters,
   selectedSectionFilter,
   setSelectedSectionFilter,
+  selectedSemesterFilter,
+  setSelectedSemesterFilter,
   availableSections,
+  availableSemesters,
   userRole,
 }) => {
   return (
@@ -53,6 +59,29 @@ const ScheduleFilters: React.FC<ScheduleFiltersProps> = ({
         </PopoverTrigger>
         <PopoverContent className="w-[220px] p-4">
           <div className="grid gap-4">
+            {/* Filtro por semestre si es administrador */}
+            {userRole === "administrativo" && isScheduleEnabled && availableSemesters.length > 0 && (
+              <div className="space-y-2">
+                <h4 className="font-medium text-sm">Semestre</h4>
+                <Select
+                  value={selectedSemesterFilter}
+                  onValueChange={setSelectedSemesterFilter}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Todos los semestres" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">Todos los semestres</SelectItem>
+                    {availableSemesters.map((semester, index) => (
+                      <SelectItem key={index} value={semester}>
+                        {semester}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+            
             {/* Filtro por sección si es administrador */}
             {userRole === "administrativo" && isScheduleEnabled && availableSections.length > 0 && (
               <div className="space-y-2">

@@ -13,7 +13,7 @@ import { ScheduleType } from "@/types/schedule";
 import { createInitialSchedule, careers, subjects } from "@/utils/sampleScheduleData";
 
 export default function Schedule() {
-  const daysOfWeek = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes"];
+  const daysOfWeek = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
   const timeSlots = Array.from({ length: 14 }, (_, i) => 8 + i); // 8 AM to 9 PM
   const { toast } = useToast();
 
@@ -22,15 +22,16 @@ export default function Schedule() {
   };
 
   // Use the sample schedule data
-  const [schedule, setSchedule] = useState<ScheduleType>(createInitialSchedule());
+  const [schedule, setSchedule] = useState<ScheduleType>(createInitialSchedule(daysOfWeek));
   const [currentPeriod, setCurrentPeriod] = useState("Primavera 2025");
   const [showFilters, setShowFilters] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [hasErrors, setHasErrors] = useState(true); // Para el botón de publicación
-  const { userRole, isTestMode, sections } = useAppContext();
+  const { userRole, isTestMode, sections, semesters } = useAppContext();
 
-  // Estado para filtrar por sección
+  // Estado para filtrar por sección y semestre
   const [selectedSectionFilter, setSelectedSectionFilter] = useState<string>("");
+  const [selectedSemesterFilter, setSelectedSemesterFilter] = useState<string>("");
 
   // Datos de ejemplo para el selector jerárquico
   const [institutions] = useState<Institution[]>([
@@ -125,7 +126,11 @@ export default function Schedule() {
         name: courseDetails.name,
         room: courseDetails.classroom,
         faculty: courseDetails.teacher,
+        section: courseDetails.section,
+        semester: courseDetails.semester,
         colorClass: courseDetails.colorClass,
+        startHour: courseDetails.startHour,
+        endHour: courseDetails.endHour,
         hasConflict: true
       });
     } else {
@@ -136,7 +141,11 @@ export default function Schedule() {
         name: courseDetails.name,
         room: courseDetails.classroom,
         faculty: courseDetails.teacher,
-        colorClass: courseDetails.colorClass
+        section: courseDetails.section,
+        semester: courseDetails.semester,
+        colorClass: courseDetails.colorClass,
+        startHour: courseDetails.startHour,
+        endHour: courseDetails.endHour
       });
     }
     
@@ -159,6 +168,7 @@ export default function Schedule() {
               Aula: course.room,
               Docente: course.faculty,
               Sección: course.section || "General",
+              Semestre: course.semester || "No especificado",
               Conflicto: slot.courses.length > 1 ? "Sí" : "No"
             });
           }
@@ -169,7 +179,7 @@ export default function Schedule() {
     return excelData;
   };
 
-  // Filter schedule based on search query and section
+  // Filter schedule based on search query, section, and semester
   const filteredSchedule = () => {
     let filteredSch = JSON.parse(JSON.stringify(schedule)) as ScheduleType;
     
@@ -183,7 +193,19 @@ export default function Schedule() {
               course.name.toLowerCase().includes(searchQuery) ||
               course.room.toLowerCase().includes(searchQuery) ||
               course.faculty.toLowerCase().includes(searchQuery) ||
-              (course.section && course.section.toLowerCase().includes(searchQuery))
+              (course.section && course.section.toLowerCase().includes(searchQuery)) ||
+              (course.semester && course.semester.toLowerCase().includes(searchQuery))
+          );
+        }
+      }
+    }
+    
+    // Aplicar filtro de semestre si está seleccionado
+    if (selectedSemesterFilter) {
+      for (const day in filteredSch) {
+        for (let i = 0; i < filteredSch[day].length; i++) {
+          filteredSch[day][i].courses = filteredSch[day][i].courses.filter(
+            (course) => course.semester === selectedSemesterFilter
           );
         }
       }
@@ -222,6 +244,11 @@ export default function Schedule() {
   // Obtener secciones disponibles para la carrera seleccionada
   const availableSections = currentSelection.career 
     ? sections.filter(section => section.careerId === currentSelection.career.id).map(s => s.name)
+    : [];
+
+  // Obtener semestres disponibles para la carrera seleccionada
+  const availableSemesters = currentSelection.career && semesters
+    ? semesters.filter(semester => semester.careerId === currentSelection.career!.id).map(s => s.name)
     : [];
 
   return (
@@ -265,7 +292,10 @@ export default function Schedule() {
         setShowFilters={setShowFilters}
         selectedSectionFilter={selectedSectionFilter}
         setSelectedSectionFilter={setSelectedSectionFilter}
+        selectedSemesterFilter={selectedSemesterFilter}
+        setSelectedSemesterFilter={setSelectedSemesterFilter}
         availableSections={availableSections}
+        availableSemesters={availableSemesters}
         userRole={userRole}
       />
 
