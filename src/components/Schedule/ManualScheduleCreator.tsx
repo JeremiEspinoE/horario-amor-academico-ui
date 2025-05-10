@@ -1,16 +1,8 @@
 
 import React, { useState, useEffect } from 'react';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { Calendar, Clock, Building, User, GraduationCap } from "lucide-react";
 import { HierarchicalSelect, Institution, Career, Subject } from '@/components/Hierarchical/HierarchicalSelect';
-import { useAppContext, ClassroomType, Classroom, Section } from '@/context/AppContext';
+import { useAppContext } from '@/context/AppContext';
 import { useToast } from "@/hooks/use-toast";
 import {
   Card,
@@ -20,18 +12,12 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-
-interface Teacher {
-  id: string;
-  name: string;
-  specialties: string[];
-}
-
-interface Semester {
-  id: string;
-  name: string;
-  careerId: string;
-}
+import { sampleTeachers } from '@/types/teacher';
+import DaySelector from './DaySelector';
+import TimeSelector from './TimeSelector';
+import ClassroomSelector from './ClassroomSelector';
+import TeacherSelector from './TeacherSelector';
+import SemesterSectionSelector from './SemesterSectionSelector';
 
 interface ManualScheduleCreatorProps {
   institutions: Institution[];
@@ -60,7 +46,7 @@ const ManualScheduleCreator: React.FC<ManualScheduleCreatorProps> = ({
     subject: null
   });
   
-  // Estados adicionales para el formulario
+  // Form states
   const [selectedSemester, setSelectedSemester] = useState<string>("");
   const [selectedSection, setSelectedSection] = useState<string>("");
   const [selectedDay, setSelectedDay] = useState<string>("");
@@ -69,24 +55,18 @@ const ManualScheduleCreator: React.FC<ManualScheduleCreatorProps> = ({
   const [selectedClassroom, setSelectedClassroom] = useState<string>("");
   const [selectedTeacher, setSelectedTeacher] = useState<string>("");
   
-  // Datos filtrados
-  const [filteredSections, setFilteredSections] = useState<Section[]>([]);
-  const [filteredSemesters, setFilteredSemesters] = useState<Semester[]>([]);
-  const [filteredClassrooms, setFilteredClassrooms] = useState<Classroom[]>([]);
+  // Filtered data states
+  const [filteredSections, setFilteredSections] = useState([]);
+  const [filteredSemesters, setFilteredSemesters] = useState([]);
+  const [filteredClassrooms, setFilteredClassrooms] = useState([]);
   const [availableEndHours, setAvailableEndHours] = useState<number[]>([]);
 
-  // Datos de ejemplo de profesores
-  const [teachers] = useState<Teacher[]>([
-    { id: "t1", name: "Dr. Juan Pérez", specialties: ["Matemáticas", "Física"] },
-    { id: "t2", name: "Dra. María López", specialties: ["Informática", "Matemáticas"] },
-    { id: "t3", name: "Prof. Carlos Rodríguez", specialties: ["Negocios"] },
-    { id: "t4", name: "Dra. Ana Martínez", specialties: ["Informática"] }
-  ]);
-  
+  // Days of week
+  const daysOfWeek = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
+
   // Filtrar semestres cuando cambia la carrera seleccionada
   useEffect(() => {
     if (currentSelection.career) {
-      // En un caso real, esto vendría de la base de datos
       const filtered = semesters ? semesters.filter(semester => 
         semester.careerId === currentSelection.career!.id
       ) : [];
@@ -158,11 +138,11 @@ const ManualScheduleCreator: React.FC<ManualScheduleCreatorProps> = ({
   // Filtrar profesores con especialidad adecuada
   const getEligibleTeachers = () => {
     if (currentSelection.subject?.specialty) {
-      return teachers.filter(teacher => 
+      return sampleTeachers.filter(teacher => 
         teacher.specialties.includes(currentSelection.subject!.specialty!)
       );
     }
-    return teachers;
+    return sampleTeachers;
   };
   
   // Función para crear horario manualmente
@@ -203,7 +183,7 @@ const ManualScheduleCreator: React.FC<ManualScheduleCreatorProps> = ({
         classroomType: classroomTypes.find(type => 
           type.id === classrooms.find(room => room.id === selectedClassroom)?.typeId
         )?.name || "",
-        teacher: teachers.find(teacher => teacher.id === selectedTeacher)?.name || "",
+        teacher: sampleTeachers.find(teacher => teacher.id === selectedTeacher)?.name || "",
         section: filteredSections.find(section => section.id === selectedSection)?.name || "",
         semester: filteredSemesters.find(sem => sem.id === selectedSemester)?.name || "",
         specialty: currentSelection.subject.specialty || "",
@@ -230,8 +210,6 @@ const ManualScheduleCreator: React.FC<ManualScheduleCreatorProps> = ({
     setSelectedTeacher("");
   };
   
-  const daysOfWeek = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
-  
   return (
     <Card className="mb-6">
       <CardHeader>
@@ -247,153 +225,51 @@ const ManualScheduleCreator: React.FC<ManualScheduleCreatorProps> = ({
           onSelectionChange={setCurrentSelection}
         />
         
-        {/* Selector de Semestre */}
+        {/* Selector de Semestre y Sección */}
         {currentSelection.career && (
-          <div className="grid grid-cols-[auto_1fr] items-center gap-2 pt-4">
-            <GraduationCap className="h-5 w-5 text-muted-foreground" />
-            <Select 
-              value={selectedSemester}
-              onValueChange={setSelectedSemester}
-              disabled={filteredSemesters.length === 0}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Seleccionar Semestre" />
-              </SelectTrigger>
-              <SelectContent>
-                {filteredSemesters.map(semester => (
-                  <SelectItem key={semester.id} value={semester.id}>{semester.name}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        )}
-        
-        {/* Selector de Sección */}
-        {currentSelection.career && selectedSemester && (
-          <div className="grid grid-cols-[auto_1fr] items-center gap-2">
-            <Building className="h-5 w-5 text-muted-foreground" />
-            <Select 
-              value={selectedSection}
-              onValueChange={setSelectedSection}
-              disabled={filteredSections.length === 0}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Seleccionar Sección" />
-              </SelectTrigger>
-              <SelectContent>
-                {filteredSections.map(section => (
-                  <SelectItem key={section.id} value={section.id}>{section.name}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+          <SemesterSectionSelector
+            selectedSemester={selectedSemester}
+            onSemesterChange={setSelectedSemester}
+            selectedSection={selectedSection}
+            onSectionChange={setSelectedSection}
+            filteredSemesters={filteredSemesters}
+            filteredSections={filteredSections}
+          />
         )}
         
         {/* Selectores adicionales (solo visibles si se seleccionó asignatura) */}
         {currentSelection.subject && selectedSection && (
           <>
             {/* Selector de Día */}
-            <div className="grid grid-cols-[auto_1fr] items-center gap-2">
-              <Calendar className="h-5 w-5 text-muted-foreground" />
-              <Select 
-                value={selectedDay}
-                onValueChange={setSelectedDay}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Seleccionar Día" />
-                </SelectTrigger>
-                <SelectContent>
-                  {daysOfWeek.map(day => (
-                    <SelectItem key={day} value={day}>{day}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+            <DaySelector
+              selectedDay={selectedDay}
+              onDayChange={setSelectedDay}
+              daysOfWeek={daysOfWeek}
+            />
             
-            {/* Selector de Hora de Inicio */}
-            <div className="grid grid-cols-[auto_1fr] items-center gap-2">
-              <Clock className="h-5 w-5 text-muted-foreground" />
-              <Select 
-                value={selectedStartHour}
-                onValueChange={setSelectedStartHour}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Seleccionar Hora de Inicio" />
-                </SelectTrigger>
-                <SelectContent>
-                  {Array.from({ length: 14 }, (_, i) => 8 + i).map(hour => (
-                    <SelectItem key={hour} value={hour.toString()}>
-                      {`${hour % 12 || 12}:00 ${hour < 12 ? 'AM' : 'PM'}`}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            
-            {/* Selector de Hora de Fin */}
-            <div className="grid grid-cols-[auto_1fr] items-center gap-2">
-              <Clock className="h-5 w-5 text-muted-foreground" />
-              <Select 
-                value={selectedEndHour}
-                onValueChange={setSelectedEndHour}
-                disabled={availableEndHours.length === 0}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Seleccionar Hora de Fin" />
-                </SelectTrigger>
-                <SelectContent>
-                  {availableEndHours.map(hour => (
-                    <SelectItem key={hour} value={hour.toString()}>
-                      {`${hour % 12 || 12}:00 ${hour < 12 ? 'AM' : 'PM'}`}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+            {/* Selectores de Hora */}
+            <TimeSelector
+              startHour={selectedStartHour}
+              endHour={selectedEndHour}
+              onStartHourChange={setSelectedStartHour}
+              onEndHourChange={setSelectedEndHour}
+              availableEndHours={availableEndHours}
+            />
             
             {/* Selector de Aula */}
-            <div className="grid grid-cols-[auto_1fr] items-center gap-2">
-              <Building className="h-5 w-5 text-muted-foreground" />
-              <Select 
-                value={selectedClassroom}
-                onValueChange={setSelectedClassroom}
-                disabled={filteredClassrooms.length === 0}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Seleccionar Aula" />
-                </SelectTrigger>
-                <SelectContent>
-                  {filteredClassrooms.map(classroom => {
-                    const type = classroomTypes.find(t => t.id === classroom.typeId);
-                    return (
-                      <SelectItem key={classroom.id} value={classroom.id}>
-                        {`${classroom.code} (${type?.name || 'Desconocido'})`}
-                      </SelectItem>
-                    );
-                  })}
-                </SelectContent>
-              </Select>
-            </div>
+            <ClassroomSelector
+              selectedClassroom={selectedClassroom}
+              onClassroomChange={setSelectedClassroom}
+              filteredClassrooms={filteredClassrooms}
+              classroomTypes={classroomTypes}
+            />
             
             {/* Selector de Docente */}
-            <div className="grid grid-cols-[auto_1fr] items-center gap-2">
-              <User className="h-5 w-5 text-muted-foreground" />
-              <Select 
-                value={selectedTeacher}
-                onValueChange={setSelectedTeacher}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Seleccionar Docente" />
-                </SelectTrigger>
-                <SelectContent>
-                  {getEligibleTeachers().map(teacher => (
-                    <SelectItem key={teacher.id} value={teacher.id}>
-                      {`${teacher.name} (${teacher.specialties.join(', ')})`}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+            <TeacherSelector
+              selectedTeacher={selectedTeacher}
+              onTeacherChange={setSelectedTeacher}
+              eligibleTeachers={getEligibleTeachers()}
+            />
           </>
         )}
       </CardContent>

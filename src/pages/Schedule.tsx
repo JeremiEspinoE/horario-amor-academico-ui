@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { useAppContext } from "@/context/AppContext";
 import { useToast } from "@/hooks/use-toast";
-import { HierarchicalSelect, Institution, Career, Subject } from "@/components/Hierarchical/HierarchicalSelect";
+import { HierarchicalSelect, Institution, Career, Subject } from '@/components/Hierarchical/HierarchicalSelect';
 import ManualScheduleCreator from "@/components/Schedule/ManualScheduleCreator";
 import ScheduleHeader from "@/components/Schedule/ScheduleHeader";
 import ScheduleFilters from "@/components/Schedule/ScheduleFilters";
@@ -10,19 +10,16 @@ import ScheduleDisplay from "@/components/Schedule/ScheduleDisplay";
 import ScheduleLegend from "@/components/Schedule/ScheduleLegend";
 import SelectionNotice from "@/components/Schedule/SelectionNotice";
 import { ScheduleType } from "@/types/schedule";
-import { createInitialSchedule, careers, subjects } from "@/utils/sampleScheduleData";
+import { createInitialSchedule } from "@/utils/sampleScheduleData";
+import { careers, subjects } from "@/utils/sampleScheduleData";
 
 export default function Schedule() {
   const daysOfWeek = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
   const timeSlots = Array.from({ length: 14 }, (_, i) => 8 + i); // 8 AM to 9 PM
   const { toast } = useToast();
 
-  const formatTimeSlot = (hour: number) => {
-    return `${hour % 12 || 12}:00 ${hour < 12 ? "AM" : "PM"}`;
-  };
-
-  // Use the sample schedule data
-  const [schedule, setSchedule] = useState<ScheduleType>(createInitialSchedule(daysOfWeek));
+  // Use the sample schedule data without passing arguments
+  const [schedule, setSchedule] = useState<ScheduleType>(createInitialSchedule());
   const [currentPeriod, setCurrentPeriod] = useState("Primavera 2025");
   const [showFilters, setShowFilters] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -49,6 +46,11 @@ export default function Schedule() {
     career: null,
     subject: null
   });
+
+  // Función para formatear la hora
+  const formatTimeSlot = (hour: number) => {
+    return `${hour % 12 || 12}:00 ${hour < 12 ? "AM" : "PM"}`;
+  };
 
   // Verificar si hay errores en el horario (conflictos)
   useEffect(() => {

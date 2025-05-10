@@ -21,6 +21,13 @@ export interface Section {
   careerId: string;
 }
 
+// Add Semester type definition
+export interface Semester {
+  id: string;
+  name: string;
+  careerId: string;
+}
+
 interface AppContextType {
   userRole: string | null;
   setUserRole: (role: string) => void;
@@ -36,6 +43,8 @@ interface AppContextType {
   setClassrooms: (classrooms: Classroom[]) => void;
   sections: Section[];
   setSections: (sections: Section[]) => void;
+  semesters: Semester[];  // Add semesters property to the context
+  setSemesters: (semesters: Semester[]) => void;  // Add setter for semesters
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -74,6 +83,15 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     { id: 'sec4', name: 'Sección A', careerId: 'car3' },
     { id: 'sec5', name: 'Sección B', careerId: 'car3' }
   ]);
+  
+  // Add semesters state
+  const [semesters, setSemesters] = useState<Semester[]>([
+    { id: 'sem1', name: 'Semestre 1', careerId: 'car1' },
+    { id: 'sem2', name: 'Semestre 2', careerId: 'car1' },
+    { id: 'sem3', name: 'Semestre 3', careerId: 'car2' },
+    { id: 'sem4', name: 'Semestre 1', careerId: 'car3' },
+    { id: 'sem5', name: 'Semestre 2', careerId: 'car3' }
+  ]);
 
   // Cargar el rol del usuario de localStorage al iniciar
   useEffect(() => {
@@ -103,7 +121,9 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     classrooms,
     setClassrooms,
     sections,
-    setSections
+    setSections,
+    semesters,
+    setSemesters
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
