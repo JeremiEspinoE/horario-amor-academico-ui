@@ -1,0 +1,149 @@
+
+import React from "react";
+import { Search, Filter, Info } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
+interface ScheduleFiltersProps {
+  isScheduleEnabled: boolean;
+  handleSearch: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  showFilters: boolean;
+  setShowFilters: (show: boolean) => void;
+  selectedSectionFilter: string;
+  setSelectedSectionFilter: (section: string) => void;
+  availableSections: string[];
+  userRole: string | null;
+}
+
+const ScheduleFilters: React.FC<ScheduleFiltersProps> = ({
+  isScheduleEnabled,
+  handleSearch,
+  showFilters,
+  setShowFilters,
+  selectedSectionFilter,
+  setSelectedSectionFilter,
+  availableSections,
+  userRole,
+}) => {
+  return (
+    <div className="flex flex-col md:flex-row gap-4">
+      <div className="relative flex-1">
+        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <Input placeholder="Buscar en horario..." className="pl-10" onChange={handleSearch} disabled={!isScheduleEnabled} />
+      </div>
+      <Popover open={showFilters} onOpenChange={setShowFilters}>
+        <PopoverTrigger asChild>
+          <Button variant="outline" className="w-full md:w-[150px]" disabled={!isScheduleEnabled}>
+            <Filter className="mr-2 h-4 w-4" />
+            Filtros
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-[220px] p-4">
+          <div className="grid gap-4">
+            {/* Filtro por sección si es administrador */}
+            {userRole === "administrativo" && isScheduleEnabled && availableSections.length > 0 && (
+              <div className="space-y-2">
+                <h4 className="font-medium text-sm">Sección</h4>
+                <Select
+                  value={selectedSectionFilter}
+                  onValueChange={setSelectedSectionFilter}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Todas las secciones" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">Todas las secciones</SelectItem>
+                    {availableSections.map((section, index) => (
+                      <SelectItem key={index} value={section}>
+                        {section}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+
+            <div className="space-y-2">
+              <h4 className="font-medium text-sm">Departamento</h4>
+              <div className="space-y-2">
+                <div className="flex items-center space-x-2">
+                  <Checkbox id="comp-sci" />
+                  <label
+                    htmlFor="comp-sci"
+                    className="text-sm font-normal leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                  >
+                    Informática
+                  </label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Checkbox id="business" />
+                  <label
+                    htmlFor="business"
+                    className="text-sm font-normal leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                  >
+                    Negocios
+                  </label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Checkbox id="math" />
+                  <label
+                    htmlFor="math"
+                    className="text-sm font-normal leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                  >
+                    Matemáticas
+                  </label>
+                </div>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <h4 className="font-medium text-sm">Opciones de visualización</h4>
+              <div className="space-y-2">
+                <div className="flex items-center space-x-2">
+                  <Checkbox id="show-conflicts" defaultChecked />
+                  <label
+                    htmlFor="show-conflicts"
+                    className="text-sm font-normal leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                  >
+                    Resaltar conflictos
+                  </label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Checkbox id="show-empty" />
+                  <label
+                    htmlFor="show-empty"
+                    className="text-sm font-normal leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                  >
+                    Ocultar espacios vacíos
+                  </label>
+                </div>
+              </div>
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              className="mt-2"
+              onClick={() => setShowFilters(false)}
+            >
+              Aplicar Filtros
+            </Button>
+          </div>
+        </PopoverContent>
+      </Popover>
+    </div>
+  );
+};
+
+export default ScheduleFilters;
