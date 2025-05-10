@@ -43,25 +43,14 @@ import { ExcelExport } from "@/components/Schedule/ExcelExport";
 import { useAppContext } from "@/context/AppContext";
 import { HierarchicalSelect, Institution, Career, Subject } from "@/components/Hierarchical/HierarchicalSelect";
 import { useToast } from "@/hooks/use-toast";
+import ManualScheduleCreator from "@/components/Schedule/ManualScheduleCreator";
 
-type Course = {
-  code: string;
-  name: string;
-  room: string;
-  faculty: string;
-  colorClass: string;
-  hasConflict?: boolean;
-};
-
-type TimeSlot = {
-  courses: Course[];
-};
-
-type ScheduleType = Record<string, TimeSlot[]>;
+// ... keep existing code (Course, TimeSlot, ScheduleType interfaces)
 
 export default function Schedule() {
   const daysOfWeek = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes"];
   const timeSlots = Array.from({ length: 14 }, (_, i) => 8 + i); // 8 AM to 9 PM
+  const { toast } = useToast();
 
   const formatTimeSlot = (hour: number) => {
     return `${hour % 12 || 12}:00 ${hour < 12 ? "AM" : "PM"}`;
@@ -213,7 +202,10 @@ export default function Schedule() {
   const [showFilters, setShowFilters] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [hasErrors, setHasErrors] = useState(true); // Para el botón de publicación
-  const { isTestMode } = useAppContext();
+  const { userRole, isTestMode, sections } = useAppContext();
+
+  // Estado para filtrar por sección
+  const [selectedSectionFilter, setSelectedSectionFilter] = useState<string>("");
 
   // Datos de ejemplo para el selector jerárquico
   const [institutions] = useState<Institution[]>([
@@ -247,8 +239,6 @@ export default function Schedule() {
     career: null,
     subject: null
   });
-
-  const { toast } = useToast();
 
   // Verificar si hay errores en el horario (conflictos)
   useEffect(() => {
@@ -305,6 +295,45 @@ export default function Schedule() {
     });
   };
 
+  // Manejar la creación de un nuevo horario manual
+  const handleManualScheduleCreate = (courseItem: any) => {
+    const { day, hour, ...courseDetails } = courseItem;
+    
+    // Crear una copia del horario actual
+    const newSchedule = JSON.parse(JSON.stringify(schedule)) as ScheduleType;
+    
+    // Verificar si ya hay un curso en ese horario para esa aula o docente
+    const existingCourses = newSchedule[day][hour - 8].courses;
+    
+    const conflictWithRoom = existingCourses.some(course => course.room === courseDetails.classroom);
+    const conflictWithTeacher = existingCourses.some(course => course.faculty === courseDetails.teacher);
+    
+    if (conflictWithRoom || conflictWithTeacher) {
+      // Marcar el conflicto
+      newSchedule[day][hour - 8].courses.push({
+        ...courseDetails,
+        code: courseDetails.code,
+        name: courseDetails.name,
+        room: courseDetails.classroom,
+        faculty: courseDetails.teacher,
+        colorClass: courseDetails.colorClass,
+        hasConflict: true
+      });
+    } else {
+      // Agregar el curso sin conflicto
+      newSchedule[day][hour - 8].courses.push({
+        ...courseDetails,
+        code: courseDetails.code,
+        name: courseDetails.name,
+        room: courseDetails.classroom,
+        faculty: courseDetails.teacher,
+        colorClass: courseDetails.colorClass
+      });
+    }
+    
+    setSchedule(newSchedule);
+  };
+
   // Preparar datos para exportar a Excel
   const prepareDataForExcel = () => {
     const excelData = [];
@@ -320,6 +349,7 @@ export default function Schedule() {
               Curso: `${course.code} - ${course.name}`,
               Aula: course.room,
               Docente: course.faculty,
+              Sección: course.section || "General",
               Conflicto: slot.courses.length > 1 ? "Sí" : "No"
             });
           }
@@ -330,29 +360,60 @@ export default function Schedule() {
     return excelData;
   };
 
-  // Filter schedule based on search query
+  // Filter schedule based on search query and section
   const filteredSchedule = () => {
-    if (!searchQuery) return schedule;
-
-    const filteredSch = JSON.parse(JSON.stringify(schedule)) as ScheduleType;
-
-    for (const day in filteredSch) {
-      for (let i = 0; i < filteredSch[day].length; i++) {
-        filteredSch[day][i].courses = filteredSch[day][i].courses.filter(
-          (course) =>
-            course.code.toLowerCase().includes(searchQuery) ||
-            course.name.toLowerCase().includes(searchQuery) ||
-            course.room.toLowerCase().includes(searchQuery) ||
-            course.faculty.toLowerCase().includes(searchQuery)
-        );
+    let filteredSch = JSON.parse(JSON.stringify(schedule)) as ScheduleType;
+    
+    // Aplicar filtro de búsqueda
+    if (searchQuery) {
+      for (const day in filteredSch) {
+        for (let i = 0; i < filteredSch[day].length; i++) {
+          filteredSch[day][i].courses = filteredSch[day][i].courses.filter(
+            (course) =>
+              course.code.toLowerCase().includes(searchQuery) ||
+              course.name.toLowerCase().includes(searchQuery) ||
+              course.room.toLowerCase().includes(searchQuery) ||
+              course.faculty.toLowerCase().includes(searchQuery) ||
+              (course.section && course.section.toLowerCase().includes(searchQuery))
+          );
+        }
       }
     }
-
+    
+    // Aplicar filtro de sección si está seleccionado
+    if (selectedSectionFilter) {
+      for (const day in filteredSch) {
+        for (let i = 0; i < filteredSch[day].length; i++) {
+          filteredSch[day][i].courses = filteredSch[day][i].courses.filter(
+            (course) => course.section === selectedSectionFilter
+          );
+        }
+      }
+    }
+    
+    // Si es un docente, solo mostrar sus cursos
+    if (userRole === "docente") {
+      const teacherName = "Dra. Jane Smith"; // En un caso real, esto vendría del usuario logueado
+      
+      for (const day in filteredSch) {
+        for (let i = 0; i < filteredSch[day].length; i++) {
+          filteredSch[day][i].courses = filteredSch[day][i].courses.filter(
+            (course) => course.faculty === teacherName
+          );
+        }
+      }
+    }
+    
     return filteredSch;
   };
 
   // Verificar si se ha seleccionado una carrera para habilitar funciones
   const isScheduleEnabled = currentSelection.career !== null;
+
+  // Obtener secciones disponibles para la carrera seleccionada
+  const availableSections = currentSelection.career 
+    ? sections.filter(section => section.careerId === currentSelection.career.id).map(s => s.name)
+    : [];
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -370,7 +431,7 @@ export default function Schedule() {
           </div>
           
           {/* Botón para generar horario automático (solo para administradores) */}
-          {useAppContext().userRole === "administrativo" && (
+          {userRole === "administrativo" && (
             <AlertDialog>
               <AlertDialogTrigger asChild>
                 <Button 
@@ -474,6 +535,16 @@ export default function Schedule() {
         />
       </div>
 
+      {/* Componente de creación manual de horario (solo para administradores) */}
+      {userRole === "administrativo" && isScheduleEnabled && (
+        <ManualScheduleCreator 
+          institutions={institutions}
+          careers={careers}
+          subjects={subjects}
+          onScheduleCreate={handleManualScheduleCreate}
+        />
+      )}
+
       {!isScheduleEnabled && (
         <div className="bg-muted/70 border rounded-md p-4 mb-4 flex items-center gap-2">
           <Info className="h-5 w-5 text-muted-foreground" />
@@ -495,6 +566,29 @@ export default function Schedule() {
           </PopoverTrigger>
           <PopoverContent className="w-[220px] p-4">
             <div className="grid gap-4">
+              {/* Filtro por sección si es administrador */}
+              {userRole === "administrativo" && isScheduleEnabled && availableSections.length > 0 && (
+                <div className="space-y-2">
+                  <h4 className="font-medium text-sm">Sección</h4>
+                  <Select
+                    value={selectedSectionFilter}
+                    onValueChange={setSelectedSectionFilter}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Todas las secciones" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="">Todas las secciones</SelectItem>
+                      {availableSections.map((section, index) => (
+                        <SelectItem key={index} value={section}>
+                          {section}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+
               <div className="space-y-2">
                 <h4 className="font-medium text-sm">Departamento</h4>
                 <div className="space-y-2">
@@ -608,6 +702,11 @@ export default function Schedule() {
                         <div className="text-[10px] md:text-xs opacity-90">
                           {course.room} • {course.faculty}
                         </div>
+                        {course.section && (
+                          <div className="text-[10px] md:text-xs opacity-80">
+                            Sección: {course.section}
+                          </div>
+                        )}
                       </div>
                     ))}
                   </div>
