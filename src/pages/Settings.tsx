@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import {
   Check,
@@ -29,7 +30,6 @@ import {
   TabsList,
   TabsTrigger,
 } from "@/components/ui/tabs";
-import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import {
   AlertDialog,
@@ -81,13 +81,13 @@ export default function Settings() {
     );
     
     // Actualizar también en el contexto global
-    if (updatedData.name || updatedData.count) {
+    if (updatedData.name || updatedData.count !== undefined) {
       setContextClassroomTypes(prevTypes => 
         prevTypes.map(type => 
           type.id === id ? { 
             ...type, 
             name: updatedData.name || type.name,
-            availableCount: updatedData.count || type.availableCount
+            availableCount: updatedData.count !== undefined ? updatedData.count : type.availableCount
           } : type
         )
       );

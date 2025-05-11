@@ -1,55 +1,13 @@
 
 import React, { useState } from 'react';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, MoreHorizontal, Edit2, Trash2, School } from "lucide-react";
+import { ClassroomType, ClassroomTypesProps } from './types';
+import { ClassroomTypesList } from './ClassroomTypesList';
+import { AddClassroomTypeDialog } from './AddClassroomTypeDialog';
+import { EditClassroomTypeDialog } from './EditClassroomTypeDialog';
+import { ClassroomsConfigDialog } from './ClassroomsConfigDialog';
 
-// Tipos de aulas
-export type ClassroomType = {
-  id: string;
-  name: string;
-  description: string;
-  count: number;
-  color: string;
-};
-
-export type Classroom = {
-  id: string;
-  name: string;
-  typeId: string;
-};
-
-interface ClassroomTypesProps {
-  classroomTypes: ClassroomType[];
-  onAddType?: (type: Omit<ClassroomType, "id">) => void;
-  onEditType?: (id: string, data: Partial<ClassroomType>) => void;
-  onDeleteType?: (id: string) => void;
-}
+export { type ClassroomType } from './types';
 
 export const ClassroomTypes: React.FC<ClassroomTypesProps> = ({
   classroomTypes,
@@ -89,15 +47,6 @@ export const ClassroomTypes: React.FC<ClassroomTypesProps> = ({
   };
 
   const handleAddType = () => {
-    if (!newType.name) {
-      toast({
-        title: "Error",
-        description: "El nombre del tipo de aula es requerido",
-        variant: "destructive"
-      });
-      return;
-    }
-    
     onAddType?.(newType);
     setNewType({
       name: "",
@@ -197,243 +146,36 @@ export const ClassroomTypes: React.FC<ClassroomTypesProps> = ({
 
   return (
     <>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {classroomTypes.map((type) => (
-          <Card key={type.id}>
-            <CardHeader className="pb-2">
-              <div className="flex justify-between items-start">
-                <div className="space-y-1">
-                  <CardTitle className="text-lg">{type.name}</CardTitle>
-                  <CardDescription>{type.description}</CardDescription>
-                </div>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon">
-                      <MoreHorizontal className="h-4 w-4" />
-                      <span className="sr-only">Acciones</span>
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem
-                      onClick={() => setEditingType(type)}
-                    >
-                      <Edit2 className="mr-2 h-4 w-4" />
-                      <span>Editar</span>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      onClick={() => openClassroomsList(type)}
-                    >
-                      <School className="mr-2 h-4 w-4" />
-                      <span>Configurar Aulas</span>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      className="text-destructive focus:text-destructive"
-                      onClick={() => handleDeleteType(type.id, type.name)}
-                    >
-                      <Trash2 className="mr-2 h-4 w-4" />
-                      <span>Eliminar</span>
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div 
-                className="w-full h-2 rounded-full mt-1 mb-3" 
-                style={{ backgroundColor: type.color }}
-              />
-              <p className="text-lg font-semibold">
-                {type.count} {type.count === 1 ? 'aula' : 'aulas'} disponibles
-              </p>
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                className="text-muted-foreground mt-2"
-                onClick={() => openClassroomsList(type)}
-              >
-                <School className="mr-1 h-4 w-4" />
-                Ver aulas
-              </Button>
-            </CardContent>
-          </Card>
-        ))}
-        
-        <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
-          <DialogTrigger asChild>
-            <Card className="flex flex-col items-center justify-center cursor-pointer h-full border-dashed">
-              <CardContent className="flex flex-col items-center justify-center h-full py-8">
-                <Plus className="h-8 w-8 opacity-50" />
-                <p className="mt-2 font-medium text-muted-foreground">Añadir tipo de aula</p>
-              </CardContent>
-            </Card>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Añadir nuevo tipo de aula</DialogTitle>
-              <DialogDescription>
-                Añade un nuevo tipo de aula para la gestión de horarios.
-              </DialogDescription>
-            </DialogHeader>
-            <div className="grid gap-4 py-4">
-              <div className="grid gap-2">
-                <Label htmlFor="name">Nombre</Label>
-                <Input
-                  id="name"
-                  name="name"
-                  value={newType.name}
-                  onChange={handleInputChange}
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="description">Descripción</Label>
-                <Input
-                  id="description"
-                  name="description"
-                  value={newType.description}
-                  onChange={handleInputChange}
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="count">Cantidad disponible</Label>
-                <Input
-                  id="count"
-                  name="count"
-                  type="number"
-                  min="0"
-                  value={newType.count}
-                  onChange={handleInputChange}
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="color">Color</Label>
-                <div className="flex items-center gap-2">
-                  <input
-                    type="color"
-                    id="color"
-                    name="color"
-                    value={newType.color}
-                    onChange={handleInputChange}
-                    className="w-10 h-10 rounded cursor-pointer"
-                  />
-                  <p className="text-sm text-muted-foreground">{newType.color}</p>
-                </div>
-              </div>
-            </div>
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setShowAddDialog(false)}>
-                Cancelar
-              </Button>
-              <Button onClick={handleAddType}>Guardar</Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-      </div>
+      <ClassroomTypesList 
+        classroomTypes={classroomTypes}
+        onEdit={setEditingType}
+        onDelete={handleDeleteType}
+        onConfigureClassrooms={openClassroomsList}
+        onAddClick={() => setShowAddDialog(true)}
+      />
+
+      <AddClassroomTypeDialog
+        open={showAddDialog}
+        onOpenChange={setShowAddDialog}
+        newType={newType}
+        onInputChange={handleInputChange}
+        onAddType={handleAddType}
+      />
       
-      {/* Diálogo de edición */}
-      <Dialog open={!!editingType} onOpenChange={(open) => !open && setEditingType(null)}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Editar tipo de aula</DialogTitle>
-            <DialogDescription>
-              Actualiza la información del tipo de aula.
-            </DialogDescription>
-          </DialogHeader>
-          {editingType && (
-            <div className="grid gap-4 py-4">
-              <div className="grid gap-2">
-                <Label htmlFor="edit-name">Nombre</Label>
-                <Input
-                  id="edit-name"
-                  name="name"
-                  value={editingType.name}
-                  onChange={handleInputChange}
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="edit-description">Descripción</Label>
-                <Input
-                  id="edit-description"
-                  name="description"
-                  value={editingType.description}
-                  onChange={handleInputChange}
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="edit-count">Cantidad disponible</Label>
-                <Input
-                  id="edit-count"
-                  name="count"
-                  type="number"
-                  min="0"
-                  value={editingType.count}
-                  onChange={handleInputChange}
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="edit-color">Color</Label>
-                <div className="flex items-center gap-2">
-                  <input
-                    type="color"
-                    id="edit-color"
-                    name="color"
-                    value={editingType.color}
-                    onChange={handleInputChange}
-                    className="w-10 h-10 rounded cursor-pointer"
-                  />
-                  <p className="text-sm text-muted-foreground">{editingType.color}</p>
-                </div>
-              </div>
-            </div>
-          )}
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setEditingType(null)}>
-              Cancelar
-            </Button>
-            <Button onClick={handleEditType}>Actualizar</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <EditClassroomTypeDialog
+        editingType={editingType}
+        onClose={() => setEditingType(null)}
+        onInputChange={handleInputChange}
+        onSave={handleEditType}
+      />
       
-      {/* Diálogo de configuración de aulas individuales */}
-      <Dialog open={showClassroomsDialog} onOpenChange={setShowClassroomsDialog}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>
-              {currentClassroomType?.name} - Configuración de Aulas
-            </DialogTitle>
-            <DialogDescription>
-              Asigna nombres a cada aula disponible.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="max-h-[60vh] overflow-y-auto">
-            {currentClassroomType && classrooms[currentClassroomType.id]?.map((name, index) => (
-              <div key={index} className="flex items-center gap-2 mb-3">
-                <div 
-                  className="w-3 h-3 rounded-full flex-shrink-0" 
-                  style={{ backgroundColor: currentClassroomType.color }}
-                ></div>
-                <Input
-                  value={name}
-                  onChange={(e) => handleClassroomNameChange(index, e.target.value)}
-                  placeholder={`Aula ${index + 1}`}
-                  className="flex-1"
-                />
-              </div>
-            ))}
-            
-            {currentClassroomType && (!classrooms[currentClassroomType.id] || classrooms[currentClassroomType.id].length === 0) && (
-              <p className="text-muted-foreground text-center py-4">
-                No hay aulas configuradas. Ajusta la cantidad disponible para agregar aulas.
-              </p>
-            )}
-          </div>
-          <DialogFooter>
-            <Button onClick={() => setShowClassroomsDialog(false)}>
-              Cerrar
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <ClassroomsConfigDialog
+        open={showClassroomsDialog}
+        onOpenChange={setShowClassroomsDialog}
+        currentType={currentClassroomType}
+        classroomNames={classrooms}
+        onClassroomNameChange={handleClassroomNameChange}
+      />
     </>
   );
 };
