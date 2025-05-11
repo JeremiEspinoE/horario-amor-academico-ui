@@ -9,7 +9,7 @@ import ScheduleFilters from "@/components/Schedule/ScheduleFilters";
 import ScheduleDisplay from "@/components/Schedule/ScheduleDisplay";
 import ScheduleLegend from "@/components/Schedule/ScheduleLegend";
 import SelectionNotice from "@/components/Schedule/SelectionNotice";
-import { ScheduleType } from "@/types/schedule";
+import { ScheduleType, Course } from "@/types/schedule";
 import { createInitialSchedule } from "@/utils/sampleScheduleData";
 import { careers, subjects } from "@/utils/sampleScheduleData";
 
@@ -29,6 +29,10 @@ export default function Schedule() {
   // Estado para filtrar por sección y semestre
   const [selectedSectionFilter, setSelectedSectionFilter] = useState<string>("");
   const [selectedSemesterFilter, setSelectedSemesterFilter] = useState<string>("");
+  
+  // New filters for institution and career
+  const [selectedInstitutionFilter, setSelectedInstitutionFilter] = useState<string>("");
+  const [selectedCareerFilter, setSelectedCareerFilter] = useState<string>("");
 
   // Datos de ejemplo para el selector jerárquico
   const [institutions] = useState<Institution[]>([
@@ -181,7 +185,7 @@ export default function Schedule() {
     return excelData;
   };
 
-  // Filter schedule based on search query, section, and semester
+  // Filter schedule based on search query, section, semester, institution and career
   const filteredSchedule = () => {
     let filteredSch = JSON.parse(JSON.stringify(schedule)) as ScheduleType;
     
@@ -197,6 +201,50 @@ export default function Schedule() {
               course.faculty.toLowerCase().includes(searchQuery) ||
               (course.section && course.section.toLowerCase().includes(searchQuery)) ||
               (course.semester && course.semester.toLowerCase().includes(searchQuery))
+          );
+        }
+      }
+    }
+
+    // Apply institution filter if selected
+    if (selectedInstitutionFilter) {
+      const selectedInstitutionCourses: Record<string, boolean> = {};
+      
+      // Find all courses that belong to the selected institution
+      careers
+        .filter(career => career.institutionId === selectedInstitutionFilter)
+        .forEach(career => {
+          subjects
+            .filter(subject => subject.careerId === career.id)
+            .forEach(subject => {
+              selectedInstitutionCourses[subject.code] = true;
+            });
+        });
+      
+      for (const day in filteredSch) {
+        for (let i = 0; i < filteredSch[day].length; i++) {
+          filteredSch[day][i].courses = filteredSch[day][i].courses.filter(
+            (course) => selectedInstitutionCourses[course.code]
+          );
+        }
+      }
+    }
+    
+    // Apply career filter if selected
+    if (selectedCareerFilter) {
+      const selectedCareerCourses: Record<string, boolean> = {};
+      
+      // Find all courses that belong to the selected career
+      subjects
+        .filter(subject => subject.careerId === selectedCareerFilter)
+        .forEach(subject => {
+          selectedCareerCourses[subject.code] = true;
+        });
+      
+      for (const day in filteredSch) {
+        for (let i = 0; i < filteredSch[day].length; i++) {
+          filteredSch[day][i].courses = filteredSch[day][i].courses.filter(
+            (course) => selectedCareerCourses[course.code]
           );
         }
       }
@@ -299,6 +347,13 @@ export default function Schedule() {
         availableSections={availableSections}
         availableSemesters={availableSemesters}
         userRole={userRole}
+        // New props for institution and career filters
+        institutions={institutions}
+        careers={careers}
+        selectedInstitutionFilter={selectedInstitutionFilter}
+        setSelectedInstitutionFilter={setSelectedInstitutionFilter}
+        selectedCareerFilter={selectedCareerFilter}
+        setSelectedCareerFilter={setSelectedCareerFilter}
       />
 
       <ScheduleDisplay

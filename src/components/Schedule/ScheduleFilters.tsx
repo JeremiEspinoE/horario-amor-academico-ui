@@ -16,6 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Career, Institution, Subject } from "@/components/Hierarchical/HierarchicalSelect";
 
 interface ScheduleFiltersProps {
   isScheduleEnabled: boolean;
@@ -29,6 +30,13 @@ interface ScheduleFiltersProps {
   availableSections: string[];
   availableSemesters: string[];
   userRole: string | null;
+  // New props for institution and career filters
+  institutions: Institution[];
+  careers: Career[];
+  selectedInstitutionFilter: string;
+  setSelectedInstitutionFilter: (institution: string) => void;
+  selectedCareerFilter: string;
+  setSelectedCareerFilter: (career: string) => void;
 }
 
 const ScheduleFilters: React.FC<ScheduleFiltersProps> = ({
@@ -43,7 +51,19 @@ const ScheduleFilters: React.FC<ScheduleFiltersProps> = ({
   availableSections,
   availableSemesters,
   userRole,
+  // New props
+  institutions,
+  careers,
+  selectedInstitutionFilter,
+  setSelectedInstitutionFilter,
+  selectedCareerFilter,
+  setSelectedCareerFilter,
 }) => {
+  // Get careers filtered by selected institution
+  const filteredCareers = selectedInstitutionFilter 
+    ? careers.filter(career => career.institutionId === selectedInstitutionFilter)
+    : careers;
+
   return (
     <div className="flex flex-col md:flex-row gap-4">
       <div className="relative flex-1">
@@ -57,10 +77,56 @@ const ScheduleFilters: React.FC<ScheduleFiltersProps> = ({
             Filtros
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-[220px] p-4">
+        <PopoverContent className="w-[280px] p-4">
           <div className="grid gap-4">
-            {/* Filtro por semestre si es administrador */}
-            {userRole === "administrativo" && isScheduleEnabled && availableSemesters.length > 0 && (
+            {/* Institution filter */}
+            {isScheduleEnabled && institutions.length > 0 && (
+              <div className="space-y-2">
+                <h4 className="font-medium text-sm">Institución</h4>
+                <Select
+                  value={selectedInstitutionFilter}
+                  onValueChange={setSelectedInstitutionFilter}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Todas las instituciones" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">Todas las instituciones</SelectItem>
+                    {institutions.map((institution) => (
+                      <SelectItem key={institution.id} value={institution.id}>
+                        {institution.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+
+            {/* Career filter */}
+            {isScheduleEnabled && filteredCareers.length > 0 && (
+              <div className="space-y-2">
+                <h4 className="font-medium text-sm">Carrera</h4>
+                <Select
+                  value={selectedCareerFilter}
+                  onValueChange={setSelectedCareerFilter}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Todas las carreras" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">Todas las carreras</SelectItem>
+                    {filteredCareers.map((career) => (
+                      <SelectItem key={career.id} value={career.id}>
+                        {career.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+
+            {/* Semester filter for all users */}
+            {isScheduleEnabled && availableSemesters.length > 0 && (
               <div className="space-y-2">
                 <h4 className="font-medium text-sm">Semestre</h4>
                 <Select
@@ -82,7 +148,7 @@ const ScheduleFilters: React.FC<ScheduleFiltersProps> = ({
               </div>
             )}
             
-            {/* Filtro por sección si es administrador */}
+            {/* Section filter for admin only */}
             {userRole === "administrativo" && isScheduleEnabled && availableSections.length > 0 && (
               <div className="space-y-2">
                 <h4 className="font-medium text-sm">Sección</h4>
