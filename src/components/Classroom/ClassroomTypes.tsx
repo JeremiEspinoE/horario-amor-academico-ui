@@ -27,7 +27,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, MoreHorizontal, Edit2, Trash2 } from "lucide-react";
+import { Plus, MoreHorizontal, Edit2, Trash2, School } from "lucide-react";
 
 // Tipos de aulas
 export type ClassroomType = {
@@ -36,6 +36,12 @@ export type ClassroomType = {
   description: string;
   count: number;
   color: string;
+};
+
+export type Classroom = {
+  id: string;
+  name: string;
+  typeId: string;
 };
 
 interface ClassroomTypesProps {
@@ -59,6 +65,11 @@ export const ClassroomTypes: React.FC<ClassroomTypesProps> = ({
     count: 0,
     color: "#3B82F6" // Default blue color
   });
+  
+  // Estado para el diálogo de aulas individuales
+  const [showClassroomsDialog, setShowClassroomsDialog] = useState(false);
+  const [currentClassroomType, setCurrentClassroomType] = useState<ClassroomType | null>(null);
+  const [classrooms, setClassrooms] = useState<Record<string, string[]>>({});
   
   const { toast } = useToast();
 
@@ -105,7 +116,35 @@ export const ClassroomTypes: React.FC<ClassroomTypesProps> = ({
   const handleEditType = () => {
     if (!editingType || !editingType.name) return;
     
+    const oldCount = classroomTypes.find(t => t.id === editingType.id)?.count || 0;
+    const newCount = editingType.count;
+    
     onEditType?.(editingType.id, editingType);
+    
+    // Si cambia la cantidad, actualizar el arreglo de aulas
+    if (newCount !== oldCount) {
+      const currentNames = classrooms[editingType.id] || [];
+      
+      // Si la nueva cantidad es mayor, agregar nuevas aulas con nombres por defecto
+      if (newCount > oldCount) {
+        const newClassrooms = [...currentNames];
+        for (let i = oldCount; i < newCount; i++) {
+          newClassrooms.push(`Aula ${i + 1}`);
+        }
+        setClassrooms({
+          ...classrooms,
+          [editingType.id]: newClassrooms
+        });
+      } 
+      // Si la nueva cantidad es menor, truncar la lista de aulas
+      else if (newCount < oldCount && newCount >= 0) {
+        setClassrooms({
+          ...classrooms,
+          [editingType.id]: currentNames.slice(0, newCount)
+        });
+      }
+    }
+    
     setEditingType(null);
     
     toast({
@@ -117,10 +156,42 @@ export const ClassroomTypes: React.FC<ClassroomTypesProps> = ({
   const handleDeleteType = (id: string, name: string) => {
     onDeleteType?.(id);
     
+    // Eliminar también las aulas asociadas
+    const updatedClassrooms = { ...classrooms };
+    delete updatedClassrooms[id];
+    setClassrooms(updatedClassrooms);
+    
     toast({
       title: "Tipo de aula eliminado",
       description: `Se ha eliminado el tipo de aula "${name}"`,
       variant: "destructive"
+    });
+  };
+
+  const openClassroomsList = (type: ClassroomType) => {
+    setCurrentClassroomType(type);
+    
+    // Inicializar la lista de aulas si no existe
+    if (!classrooms[type.id]) {
+      const initialClassrooms = Array.from({ length: type.count }, (_, i) => `Aula ${i + 1}`);
+      setClassrooms({
+        ...classrooms,
+        [type.id]: initialClassrooms
+      });
+    }
+    
+    setShowClassroomsDialog(true);
+  };
+
+  const handleClassroomNameChange = (index: number, value: string) => {
+    if (!currentClassroomType) return;
+    
+    const updatedClassrooms = [...(classrooms[currentClassroomType.id] || [])];
+    updatedClassrooms[index] = value;
+    
+    setClassrooms({
+      ...classrooms,
+      [currentClassroomType.id]: updatedClassrooms
     });
   };
 
@@ -150,6 +221,12 @@ export const ClassroomTypes: React.FC<ClassroomTypesProps> = ({
                       <span>Editar</span>
                     </DropdownMenuItem>
                     <DropdownMenuItem
+                      onClick={() => openClassroomsList(type)}
+                    >
+                      <School className="mr-2 h-4 w-4" />
+                      <span>Configurar Aulas</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
                       className="text-destructive focus:text-destructive"
                       onClick={() => handleDeleteType(type.id, type.name)}
                     >
@@ -168,6 +245,15 @@ export const ClassroomTypes: React.FC<ClassroomTypesProps> = ({
               <p className="text-lg font-semibold">
                 {type.count} {type.count === 1 ? 'aula' : 'aulas'} disponibles
               </p>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="text-muted-foreground mt-2"
+                onClick={() => openClassroomsList(type)}
+              >
+                <School className="mr-1 h-4 w-4" />
+                Ver aulas
+              </Button>
             </CardContent>
           </Card>
         ))}
@@ -304,6 +390,47 @@ export const ClassroomTypes: React.FC<ClassroomTypesProps> = ({
               Cancelar
             </Button>
             <Button onClick={handleEditType}>Actualizar</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      
+      {/* Diálogo de configuración de aulas individuales */}
+      <Dialog open={showClassroomsDialog} onOpenChange={setShowClassroomsDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>
+              {currentClassroomType?.name} - Configuración de Aulas
+            </DialogTitle>
+            <DialogDescription>
+              Asigna nombres a cada aula disponible.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="max-h-[60vh] overflow-y-auto">
+            {currentClassroomType && classrooms[currentClassroomType.id]?.map((name, index) => (
+              <div key={index} className="flex items-center gap-2 mb-3">
+                <div 
+                  className="w-3 h-3 rounded-full flex-shrink-0" 
+                  style={{ backgroundColor: currentClassroomType.color }}
+                ></div>
+                <Input
+                  value={name}
+                  onChange={(e) => handleClassroomNameChange(index, e.target.value)}
+                  placeholder={`Aula ${index + 1}`}
+                  className="flex-1"
+                />
+              </div>
+            ))}
+            
+            {currentClassroomType && (!classrooms[currentClassroomType.id] || classrooms[currentClassroomType.id].length === 0) && (
+              <p className="text-muted-foreground text-center py-4">
+                No hay aulas configuradas. Ajusta la cantidad disponible para agregar aulas.
+              </p>
+            )}
+          </div>
+          <DialogFooter>
+            <Button onClick={() => setShowClassroomsDialog(false)}>
+              Cerrar
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

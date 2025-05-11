@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import {
   Check,
@@ -43,10 +42,64 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { ClassroomType, ClassroomTypes } from "@/components/Classroom/ClassroomTypes";
+import { v4 as uuidv4 } from 'uuid';
+import { useAppContext } from "@/context/AppContext";
 
 export default function Settings() {
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("academic-periods");
+  const { classroomTypes: contextClassroomTypes, setClassroomTypes: setContextClassroomTypes } = useAppContext();
+  
+  // Convertir los tipos de aula del contexto al formato requerido por el componente ClassroomTypes
+  const [classroomTypes, setClassroomTypes] = useState<ClassroomType[]>([
+    { id: "type1", name: "Aula de Teoría", description: "Para clases teóricas regulares", count: 3, color: "#4f46e5" },
+    { id: "type2", name: "Laboratorio", description: "Para prácticas y experimentos", count: 2, color: "#06b6d4" }
+  ]);
+
+  const handleAddClassroomType = (type: Omit<ClassroomType, "id">) => {
+    const newType = {
+      ...type,
+      id: uuidv4()
+    };
+    setClassroomTypes([...classroomTypes, newType]);
+    
+    // Actualizar también en el contexto global
+    const newContextType = {
+      id: newType.id,
+      name: newType.name,
+      availableCount: newType.count
+    };
+    setContextClassroomTypes([...contextClassroomTypes, newContextType]);
+  };
+
+  const handleEditClassroomType = (id: string, updatedData: Partial<ClassroomType>) => {
+    setClassroomTypes(prevTypes => 
+      prevTypes.map(type => 
+        type.id === id ? { ...type, ...updatedData } : type
+      )
+    );
+    
+    // Actualizar también en el contexto global
+    if (updatedData.name || updatedData.count) {
+      setContextClassroomTypes(prevTypes => 
+        prevTypes.map(type => 
+          type.id === id ? { 
+            ...type, 
+            name: updatedData.name || type.name,
+            availableCount: updatedData.count || type.availableCount
+          } : type
+        )
+      );
+    }
+  };
+
+  const handleDeleteClassroomType = (id: string) => {
+    setClassroomTypes(prevTypes => prevTypes.filter(type => type.id !== id));
+    
+    // Actualizar también en el contexto global
+    setContextClassroomTypes(prevTypes => prevTypes.filter(type => type.id !== id));
+  };
   
   const handleSaveSettings = () => {
     toast({
@@ -206,80 +259,16 @@ export default function Settings() {
             <CardHeader>
               <CardTitle>Tipos de Aula</CardTitle>
               <CardDescription>
-                Configura tipos de aulas y su cantidad
+                Configura tipos de aulas, cantidades y asigna nombres a cada aula
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
-              <div className="border rounded-md overflow-hidden">
-                <table className="w-full">
-                  <thead>
-                    <tr className="bg-muted/50">
-                      <th className="text-left p-3 border-b">Tipo de Aula</th>
-                      <th className="text-left p-3 border-b">Cantidad</th>
-                      <th className="text-left p-3 border-b">Instalaciones</th>
-                      <th className="text-left p-3 border-b">Acciones</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr className="border-b">
-                      <td className="p-3">
-                        <Input defaultValue="Auditorio" />
-                      </td>
-                      <td className="p-3">
-                        <Input type="number" defaultValue="120" />
-                      </td>
-                      <td className="p-3">
-                        <Input defaultValue="Proyector, Sistema de Audio, Computadora" />
-                      </td>
-                      <td className="p-3">
-                        <Button variant="outline" size="sm">Editar</Button>
-                      </td>
-                    </tr>
-                    <tr className="border-b">
-                      <td className="p-3">
-                        <Input defaultValue="Laboratorio" />
-                      </td>
-                      <td className="p-3">
-                        <Input type="number" defaultValue="30" />
-                      </td>
-                      <td className="p-3">
-                        <Input defaultValue="Computadoras, Equipo Especializado" />
-                      </td>
-                      <td className="p-3">
-                        <Button variant="outline" size="sm">Editar</Button>
-                      </td>
-                    </tr>
-                    <tr className="border-b">
-                      <td className="p-3">
-                        <Input defaultValue="Aula Regular" />
-                      </td>
-                      <td className="p-3">
-                        <Input type="number" defaultValue="40" />
-                      </td>
-                      <td className="p-3">
-                        <Input defaultValue="Pizarrón, Proyector" />
-                      </td>
-                      <td className="p-3">
-                        <Button variant="outline" size="sm">Editar</Button>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td className="p-3">
-                        <Input placeholder="Agregar nuevo tipo..." />
-                      </td>
-                      <td className="p-3">
-                        <Input type="number" placeholder="Cantidad" />
-                      </td>
-                      <td className="p-3">
-                        <Input placeholder="Instalaciones (separadas por comas)" />
-                      </td>
-                      <td className="p-3">
-                        <Button size="sm">Agregar</Button>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
+              <ClassroomTypes
+                classroomTypes={classroomTypes}
+                onAddType={handleAddClassroomType}
+                onEditType={handleEditClassroomType}
+                onDeleteType={handleDeleteClassroomType}
+              />
             </CardContent>
           </Card>
         </TabsContent>
