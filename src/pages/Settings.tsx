@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import {
   Check,
@@ -74,31 +73,31 @@ export default function Settings() {
   };
 
   const handleEditClassroomType = (id: string, updatedData: Partial<ClassroomType>) => {
-    setClassroomTypes(prevTypes => 
-      prevTypes.map(type => 
-        type.id === id ? { ...type, ...updatedData } : type
-      )
+    const updatedTypes = classroomTypes.map(type => 
+      type.id === id ? { ...type, ...updatedData } : type
     );
+    setClassroomTypes(updatedTypes);
     
     // Actualizar también en el contexto global
     if (updatedData.name || updatedData.count !== undefined) {
-      setContextClassroomTypes(prevTypes => 
-        prevTypes.map(type => 
-          type.id === id ? { 
-            ...type, 
-            name: updatedData.name || type.name,
-            availableCount: updatedData.count !== undefined ? updatedData.count : type.availableCount
-          } : type
-        )
+      const updatedContextTypes = contextClassroomTypes.map(type => 
+        type.id === id ? { 
+          ...type, 
+          name: updatedData.name || type.name,
+          availableCount: updatedData.count !== undefined ? updatedData.count : type.availableCount
+        } : type
       );
+      setContextClassroomTypes(updatedContextTypes);
     }
   };
 
   const handleDeleteClassroomType = (id: string) => {
-    setClassroomTypes(prevTypes => prevTypes.filter(type => type.id !== id));
+    const filteredTypes = classroomTypes.filter(type => type.id !== id);
+    setClassroomTypes(filteredTypes);
     
     // Actualizar también en el contexto global
-    setContextClassroomTypes(prevTypes => prevTypes.filter(type => type.id !== id));
+    const filteredContextTypes = contextClassroomTypes.filter(type => type.id !== id);
+    setContextClassroomTypes(filteredContextTypes);
   };
   
   const handleSaveSettings = () => {

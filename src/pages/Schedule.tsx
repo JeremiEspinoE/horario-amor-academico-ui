@@ -27,12 +27,12 @@ export default function Schedule() {
   const { userRole, isTestMode, sections, semesters } = useAppContext();
 
   // Estado para filtrar por sección y semestre
-  const [selectedSectionFilter, setSelectedSectionFilter] = useState<string>("");
-  const [selectedSemesterFilter, setSelectedSemesterFilter] = useState<string>("");
+  const [selectedSectionFilter, setSelectedSectionFilter] = useState<string>("all_sections");
+  const [selectedSemesterFilter, setSelectedSemesterFilter] = useState<string>("all_semesters");
   
   // New filters for institution and career
-  const [selectedInstitutionFilter, setSelectedInstitutionFilter] = useState<string>("");
-  const [selectedCareerFilter, setSelectedCareerFilter] = useState<string>("");
+  const [selectedInstitutionFilter, setSelectedInstitutionFilter] = useState<string>("all_institutions");
+  const [selectedCareerFilter, setSelectedCareerFilter] = useState<string>("all_careers");
 
   // Datos de ejemplo para el selector jerárquico
   const [institutions] = useState<Institution[]>([
@@ -207,7 +207,7 @@ export default function Schedule() {
     }
 
     // Apply institution filter if selected
-    if (selectedInstitutionFilter) {
+    if (selectedInstitutionFilter && selectedInstitutionFilter !== "all_institutions") {
       const selectedInstitutionCourses: Record<string, boolean> = {};
       
       // Find all courses that belong to the selected institution
@@ -231,7 +231,7 @@ export default function Schedule() {
     }
     
     // Apply career filter if selected
-    if (selectedCareerFilter) {
+    if (selectedCareerFilter && selectedCareerFilter !== "all_careers") {
       const selectedCareerCourses: Record<string, boolean> = {};
       
       // Find all courses that belong to the selected career
@@ -251,7 +251,7 @@ export default function Schedule() {
     }
     
     // Aplicar filtro de semestre si está seleccionado
-    if (selectedSemesterFilter) {
+    if (selectedSemesterFilter && selectedSemesterFilter !== "all_semesters") {
       for (const day in filteredSch) {
         for (let i = 0; i < filteredSch[day].length; i++) {
           filteredSch[day][i].courses = filteredSch[day][i].courses.filter(
@@ -262,7 +262,7 @@ export default function Schedule() {
     }
     
     // Aplicar filtro de sección si está seleccionado
-    if (selectedSectionFilter) {
+    if (selectedSectionFilter && selectedSectionFilter !== "all_sections") {
       for (const day in filteredSch) {
         for (let i = 0; i < filteredSch[day].length; i++) {
           filteredSch[day][i].courses = filteredSch[day][i].courses.filter(

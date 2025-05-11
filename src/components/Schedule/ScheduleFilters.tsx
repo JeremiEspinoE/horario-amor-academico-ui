@@ -91,7 +91,7 @@ const ScheduleFilters: React.FC<ScheduleFiltersProps> = ({
                     <SelectValue placeholder="Todas las instituciones" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Todas las instituciones</SelectItem>
+                    <SelectItem value="all_institutions">Todas las instituciones</SelectItem>
                     {institutions.map((institution) => (
                       <SelectItem key={institution.id} value={institution.id}>
                         {institution.name}
@@ -114,7 +114,7 @@ const ScheduleFilters: React.FC<ScheduleFiltersProps> = ({
                     <SelectValue placeholder="Todas las carreras" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Todas las carreras</SelectItem>
+                    <SelectItem value="all_careers">Todas las carreras</SelectItem>
                     {filteredCareers.map((career) => (
                       <SelectItem key={career.id} value={career.id}>
                         {career.name}
@@ -137,7 +137,7 @@ const ScheduleFilters: React.FC<ScheduleFiltersProps> = ({
                     <SelectValue placeholder="Todos los semestres" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Todos los semestres</SelectItem>
+                    <SelectItem value="all_semesters">Todos los semestres</SelectItem>
                     {availableSemesters.map((semester, index) => (
                       <SelectItem key={index} value={semester}>
                         {semester}
@@ -160,7 +160,7 @@ const ScheduleFilters: React.FC<ScheduleFiltersProps> = ({
                     <SelectValue placeholder="Todas las secciones" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Todas las secciones</SelectItem>
+                    <SelectItem value="all_sections">Todas las secciones</SelectItem>
                     {availableSections.map((section, index) => (
                       <SelectItem key={index} value={section}>
                         {section}
