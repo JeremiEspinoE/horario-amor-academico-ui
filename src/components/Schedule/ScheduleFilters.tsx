@@ -68,7 +68,12 @@ const ScheduleFilters: React.FC<ScheduleFiltersProps> = ({
     <div className="flex flex-col md:flex-row gap-4">
       <div className="relative flex-1">
         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-        <Input placeholder="Buscar en horario..." className="pl-10" onChange={handleSearch} disabled={!isScheduleEnabled} />
+        <Input 
+          placeholder={userRole === "docente" ? "Buscar en mi horario..." : "Buscar en horario..."} 
+          className="pl-10" 
+          onChange={handleSearch} 
+          disabled={!isScheduleEnabled} 
+        />
       </div>
       <Popover open={showFilters} onOpenChange={setShowFilters}>
         <PopoverTrigger asChild>
@@ -80,7 +85,7 @@ const ScheduleFilters: React.FC<ScheduleFiltersProps> = ({
         <PopoverContent className="w-[280px] p-4">
           <div className="grid gap-4">
             {/* Institution filter */}
-            {isScheduleEnabled && institutions.length > 0 && (
+            {isScheduleEnabled && institutions.length > 0 && userRole !== "docente" && (
               <div className="space-y-2">
                 <h4 className="font-medium text-sm">Institución</h4>
                 <Select
@@ -103,7 +108,7 @@ const ScheduleFilters: React.FC<ScheduleFiltersProps> = ({
             )}
 
             {/* Career filter */}
-            {isScheduleEnabled && filteredCareers.length > 0 && (
+            {isScheduleEnabled && filteredCareers.length > 0 && userRole !== "docente" && (
               <div className="space-y-2">
                 <h4 className="font-medium text-sm">Carrera</h4>
                 <Select
@@ -125,8 +130,8 @@ const ScheduleFilters: React.FC<ScheduleFiltersProps> = ({
               </div>
             )}
 
-            {/* Semester filter for all users */}
-            {isScheduleEnabled && availableSemesters.length > 0 && (
+            {/* Semester filter for both admin and teachers */}
+            {isScheduleEnabled && (
               <div className="space-y-2">
                 <h4 className="font-medium text-sm">Semestre</h4>
                 <Select
@@ -138,18 +143,27 @@ const ScheduleFilters: React.FC<ScheduleFiltersProps> = ({
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all_semesters">Todos los semestres</SelectItem>
-                    {availableSemesters.map((semester, index) => (
-                      <SelectItem key={index} value={semester}>
-                        {semester}
-                      </SelectItem>
-                    ))}
+                    {availableSemesters.length > 0 ? (
+                      availableSemesters.map((semester, index) => (
+                        <SelectItem key={index} value={semester}>
+                          {semester}
+                        </SelectItem>
+                      ))
+                    ) : (
+                      // Sample semesters for teachers when no career is selected
+                      userRole === "docente" && [
+                        <SelectItem key="sem1" value="Semestre 1">Semestre 1</SelectItem>,
+                        <SelectItem key="sem2" value="Semestre 2">Semestre 2</SelectItem>,
+                        <SelectItem key="sem3" value="Semestre 3">Semestre 3</SelectItem>
+                      ]
+                    )}
                   </SelectContent>
                 </Select>
               </div>
             )}
             
-            {/* Section filter for admin only */}
-            {userRole === "administrativo" && isScheduleEnabled && availableSections.length > 0 && (
+            {/* Section filter */}
+            {isScheduleEnabled && (
               <div className="space-y-2">
                 <h4 className="font-medium text-sm">Sección</h4>
                 <Select
@@ -161,16 +175,26 @@ const ScheduleFilters: React.FC<ScheduleFiltersProps> = ({
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all_sections">Todas las secciones</SelectItem>
-                    {availableSections.map((section, index) => (
-                      <SelectItem key={index} value={section}>
-                        {section}
-                      </SelectItem>
-                    ))}
+                    {availableSections.length > 0 ? (
+                      availableSections.map((section, index) => (
+                        <SelectItem key={index} value={section}>
+                          {section}
+                        </SelectItem>
+                      ))
+                    ) : (
+                      // Sample sections for teachers when no career is selected
+                      userRole === "docente" && [
+                        <SelectItem key="secA" value="Sección A">Sección A</SelectItem>,
+                        <SelectItem key="secB" value="Sección B">Sección B</SelectItem>,
+                        <SelectItem key="secC" value="Sección C">Sección C</SelectItem>
+                      ]
+                    )}
                   </SelectContent>
                 </Select>
               </div>
             )}
 
+            {/* Department filter for both roles */}
             <div className="space-y-2">
               <h4 className="font-medium text-sm">Departamento</h4>
               <div className="space-y-2">
@@ -203,6 +227,8 @@ const ScheduleFilters: React.FC<ScheduleFiltersProps> = ({
                 </div>
               </div>
             </div>
+
+            {/* Display options for both roles */}
             <div className="space-y-2">
               <h4 className="font-medium text-sm">Opciones de visualización</h4>
               <div className="space-y-2">

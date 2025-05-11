@@ -12,6 +12,7 @@ import SelectionNotice from "@/components/Schedule/SelectionNotice";
 import { ScheduleType, Course } from "@/types/schedule";
 import { createInitialSchedule } from "@/utils/sampleScheduleData";
 import { careers, subjects } from "@/utils/sampleScheduleData";
+import { sampleTeachers } from "@/types/teacher";
 
 export default function Schedule() {
   const daysOfWeek = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
@@ -33,6 +34,11 @@ export default function Schedule() {
   // New filters for institution and career
   const [selectedInstitutionFilter, setSelectedInstitutionFilter] = useState<string>("all_institutions");
   const [selectedCareerFilter, setSelectedCareerFilter] = useState<string>("all_careers");
+
+  // Get the current teacher's name based on logged in user (for demo purposes)
+  const currentTeacherName = userRole === "docente" 
+    ? sampleTeachers[0].name // For demo, always use the first teacher
+    : null;
 
   // Datos de ejemplo para el selector jerárquico
   const [institutions] = useState<Institution[]>([
@@ -189,6 +195,17 @@ export default function Schedule() {
   const filteredSchedule = () => {
     let filteredSch = JSON.parse(JSON.stringify(schedule)) as ScheduleType;
     
+    // If user is a teacher, first filter to only show their courses
+    if (userRole === "docente" && currentTeacherName) {
+      for (const day in filteredSch) {
+        for (let i = 0; i < filteredSch[day].length; i++) {
+          filteredSch[day][i].courses = filteredSch[day][i].courses.filter(
+            (course) => course.faculty === currentTeacherName
+          );
+        }
+      }
+    }
+    
     // Aplicar filtro de búsqueda
     if (searchQuery) {
       for (const day in filteredSch) {
@@ -272,24 +289,12 @@ export default function Schedule() {
       }
     }
     
-    // Si es un docente, solo mostrar sus cursos
-    if (userRole === "docente") {
-      const teacherName = "Dra. Jane Smith"; // En un caso real, esto vendría del usuario logueado
-      
-      for (const day in filteredSch) {
-        for (let i = 0; i < filteredSch[day].length; i++) {
-          filteredSch[day][i].courses = filteredSch[day][i].courses.filter(
-            (course) => course.faculty === teacherName
-          );
-        }
-      }
-    }
-    
     return filteredSch;
   };
 
   // Verificar si se ha seleccionado una carrera para habilitar funciones
-  const isScheduleEnabled = currentSelection.career !== null;
+  // For teachers, they don't need to select a career to view their schedule
+  const isScheduleEnabled = userRole === "docente" || currentSelection.career !== null;
 
   // Obtener secciones disponibles para la carrera seleccionada
   const availableSections = currentSelection.career 
@@ -313,15 +318,25 @@ export default function Schedule() {
         prepareDataForExcel={prepareDataForExcel}
       />
 
-      {/* Selector Jerárquico */}
-      <div className="mb-6">
-        <HierarchicalSelect
-          institutions={institutions}
-          careers={careers}
-          subjects={subjects}
-          onSelectionChange={setCurrentSelection}
-        />
-      </div>
+      {/* Selector Jerárquico - only for admin, not for teachers */}
+      {userRole !== "docente" && (
+        <div className="mb-6">
+          <HierarchicalSelect
+            institutions={institutions}
+            careers={careers}
+            subjects={subjects}
+            onSelectionChange={setCurrentSelection}
+          />
+        </div>
+      )}
+
+      {/* Teacher welcome message */}
+      {userRole === "docente" && currentTeacherName && (
+        <div className="bg-secondary/40 p-4 rounded-lg mb-6 border border-border">
+          <h2 className="text-lg font-semibold">Bienvenido(a), {currentTeacherName}</h2>
+          <p>Este es tu horario personal. Puedes usar los filtros para encontrar información específica.</p>
+        </div>
+      )}
 
       {/* Componente de creación manual de horario (solo para administradores) */}
       {userRole === "administrativo" && isScheduleEnabled && (
@@ -333,7 +348,10 @@ export default function Schedule() {
         />
       )}
 
-      <SelectionNotice isScheduleEnabled={isScheduleEnabled} />
+      {/* Show selection notice only for admins, not for teachers */}
+      {userRole !== "docente" && (
+        <SelectionNotice isScheduleEnabled={isScheduleEnabled} />
+      )}
 
       <ScheduleFilters
         isScheduleEnabled={isScheduleEnabled}
@@ -347,7 +365,6 @@ export default function Schedule() {
         availableSections={availableSections}
         availableSemesters={availableSemesters}
         userRole={userRole}
-        // New props for institution and career filters
         institutions={institutions}
         careers={careers}
         selectedInstitutionFilter={selectedInstitutionFilter}
