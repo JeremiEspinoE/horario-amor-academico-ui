@@ -1,197 +1,192 @@
-
-import {
-  BarChart3,
-  BookOpen,
-  Calendar,
-  Clock,
-  Layers,
-  LayoutGrid,
-  Users,
-  AlertTriangle,
-  CheckCircle2,
-} from "lucide-react";
-import { Card } from "@/components/ui/card";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
-import { Progress } from "@/components/ui/progress";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { academicServices, UnidadAcademica, Carrera, Materia } from "../services/academicServices";;
+import { useToast } from "@/hooks/use-toast";
+import { Trash2, Pencil } from "lucide-react";
 
-export default function Dashboard() {
-  const stats = [
-    { title: "Docentes", value: 45, icon: Users, color: "bg-faculty-600" },
-    { title: "Asignaturas", value: 128, icon: BookOpen, color: "bg-course-600" },
-    { title: "Aulas", value: 32, icon: LayoutGrid, color: "bg-room-600" },
-    { title: "Horarios Activos", value: 8, icon: Calendar, color: "bg-schedule-600" },
-  ];
+export default function AcademicManager() {
+  const { toast } = useToast();
+
+  const [unidades, setUnidades] = useState<UnidadAcademica[]>([]);
+  const [carreras, setCarreras] = useState<Carrera[]>([]);
+  const [materias, setMaterias] = useState<Materia[]>([]);
+
+  const [selectedUnidad, setSelectedUnidad] = useState<number | null>(null);
+  const [selectedCarrera, setSelectedCarrera] = useState<number | null>(null);
+
+  const [dialogCarreraOpen, setDialogCarreraOpen] = useState(false);
+  const [dialogMateriaOpen, setDialogMateriaOpen] = useState(false);
+
+  const [formCarrera, setFormCarrera] = useState({ id: null, nombre_carrera: "" });
+  const [formMateria, setFormMateria] = useState({ id: null, nombre: "", codigo: "" });
+
+  useEffect(() => {
+    academicServices.getUnidadesAcademicas().then(setUnidades);
+    academicServices.getCarreras().then(setCarreras);
+    academicServices.getMaterias().then(setMaterias);
+  }, []);
+
+  const handleUnidadChange = (id: number) => {
+    setSelectedUnidad(id);
+    setSelectedCarrera(null); // Resetear la carrera seleccionada
+  };
+
+  const handleCarreraChange = (id: number) => {
+    setSelectedCarrera(id);
+    // Ya no filtramos las materias aquí
+  };
+
+  const handleSaveCarrera = async () => {
+    try {
+      if (formCarrera.id) {
+        await academicServices.updateCarrera(formCarrera.id, formCarrera.nombre_carrera, selectedUnidad!);
+        toast({ title: "Carrera actualizada" });
+      } else {
+        await academicServices.createCarrera(formCarrera.nombre_carrera, selectedUnidad!);
+        toast({ title: "Carrera creada" });
+      }
+      setFormCarrera({ id: null, nombre_carrera: "" });
+      academicServices.getCarreras().then(setCarreras);
+      setDialogCarreraOpen(false);
+    } catch {
+      toast({ title: "Error al guardar carrera", variant: "destructive" });
+    }
+  };
+
+  const handleDeleteCarrera = async (id: number) => {
+    await academicServices.deleteCarrera(id);
+    toast({ title: "Carrera eliminada" });
+    academicServices.getCarreras().then(setCarreras);
+  };
+
+  const handleOpenEditMateriaDialog = (materia: Materia) => {
+    setFormMateria({ id: materia.id, nombre: materia.nombre_materia, codigo: materia.codigo_materia });
+    setDialogMateriaOpen(true);
+  };
+
+  const handleSaveMateria = async () => {
+    try {
+      if (formMateria.id) {
+        await academicServices.updateMateria(formMateria.id, formMateria.nombre, formMateria.codigo);
+        toast({ title: "Materia actualizada" });
+      } else {
+        await academicServices.createMateria(formMateria.nombre, formMateria.codigo);
+        toast({ title: "Materia creada" });
+      }
+      setFormMateria({ id: null, nombre: "", codigo: "" });
+      academicServices.getMaterias().then(setMaterias);
+      setDialogMateriaOpen(false);
+    } catch (error) {
+      console.error("Error al guardar materia:", error);
+      toast({ title: "Error al guardar materia", variant: "destructive" });
+    }
+  };
+
+  const handleDeleteMateria = async (id: number) => {
+    await academicServices.deleteMateria(id);
+    toast({ title: "Materia eliminada" });
+    academicServices.getMaterias().then(setMaterias);
+  };
+
+  const carrerasFiltradas = carreras.filter(c => c.unidad === selectedUnidad);
 
   return (
-    <div className="space-y-8 animate-fade-in">
-      <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold">Panel Principal</h1>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button>Periodo Académico</Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Seleccionar Periodo</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem className="font-medium">Primavera 2025</DropdownMenuItem>
-            <DropdownMenuItem>Otoño 2024</DropdownMenuItem>
-            <DropdownMenuItem>Verano 2024</DropdownMenuItem>
-            <DropdownMenuItem>Primavera 2024</DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
+    <div className="space-y-6">
+      <h2 className="text-2xl font-bold">Gestión Académica</h2>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {stats.map((stat) => (
-          <Card key={stat.title} className="dashboard-card">
-            <div className="flex justify-between items-start">
-              <div>
-                <p className="text-muted-foreground">{stat.title}</p>
-                <h3 className="text-3xl font-bold mt-1">{stat.value}</h3>
-              </div>
-              <div className={`${stat.color} rounded-lg p-2`}>
-                <stat.icon className="h-5 w-5 text-white" />
-              </div>
-            </div>
-          </Card>
-        ))}
-      </div>
+      <Select onValueChange={(v) => handleUnidadChange(Number(v))}>
+        <SelectTrigger className="w-full">
+          <SelectValue placeholder="Seleccione una Unidad Académica" />
+        </SelectTrigger>
+        <SelectContent>
+          {unidades.map(u => <SelectItem key={u.id} value={String(u.id)}>{u.nombre}</SelectItem>)}
+        </SelectContent>
+      </Select>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <Card className="dashboard-card lg:col-span-2">
-          <div className="card-header">
-            <BarChart3 className="h-5 w-5" />
-            <span>Utilización de Aulas</span>
+      {selectedUnidad && (
+        <>
+          <div className="flex justify-between items-center">
+            <h3 className="text-xl font-semibold">Carreras</h3>
+            <Button onClick={() => setDialogCarreraOpen(true)}>+ Nueva Carrera</Button>
           </div>
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <div className="flex justify-between text-sm">
-                <span>Edificio de Ciencias</span>
-                <span>78%</span>
-              </div>
-              <Progress value={78} className="h-2" />
-            </div>
-            <div className="space-y-2">
-              <div className="flex justify-between text-sm">
-                <span>Artes Liberales</span>
-                <span>64%</span>
-              </div>
-              <Progress value={64} className="h-2" />
-            </div>
-            <div className="space-y-2">
-              <div className="flex justify-between text-sm">
-                <span>Centro de Ingeniería</span>
-                <span>92%</span>
-              </div>
-              <Progress value={92} className="h-2" />
-            </div>
-            <div className="space-y-2">
-              <div className="flex justify-between text-sm">
-                <span>Facultad de Negocios</span>
-                <span>45%</span>
-              </div>
-              <Progress value={45} className="h-2" />
-            </div>
-          </div>
-        </Card>
+          {carrerasFiltradas.map(c => (
+            <Card key={c.id} onClick={() => handleCarreraChange(c.id)} className="cursor-pointer">
+              <CardHeader className="flex justify-between">
+                <CardTitle>{c.nombre_carrera}</CardTitle>
+                <div className="flex gap-2">
+                  <Button size="icon" variant="ghost" onClick={(e) => { e.stopPropagation(); setFormCarrera({ id: c.id, nombre_carrera: c.nombre_carrera }); setDialogCarreraOpen(true); }}><Pencil className="w-4 h-4" /></Button>
+                  <Button size="icon" variant="ghost" onClick={(e) => { e.stopPropagation(); handleDeleteCarrera(c.id); }}><Trash2 className="w-4 h-4" /></Button>
+                </div>
+              </CardHeader>
+            </Card>
+          ))}
 
-        <Card className="dashboard-card">
-          <div className="card-header">
-            <Clock className="h-5 w-5" />
-            <span>Estado del Horario</span>
+          {/* Sección de Materias - Siempre visible cuando una unidad está seleccionada */}
+          <div className="flex justify-between items-center mt-6">
+            <h3 className="text-xl font-semibold">Materias</h3>
+            <Button onClick={() => setDialogMateriaOpen(true)}>+ Nueva Materia</Button>
           </div>
-          <div className="space-y-4 flex-1">
-            <div className="bg-green-50 dark:bg-green-950/30 text-green-700 dark:text-green-300 border border-green-200 dark:border-green-900 rounded-md p-3 flex items-start gap-2">
-              <CheckCircle2 className="h-5 w-5 flex-shrink-0 mt-0.5" />
-              <div>
-                <p className="font-medium">Horario Primavera 2025</p>
-                <p className="text-sm mt-1">Publicado y listo</p>
-              </div>
-            </div>
-            
-            <div className="bg-yellow-50 dark:bg-yellow-950/30 text-yellow-700 dark:text-yellow-300 border border-yellow-200 dark:border-yellow-900 rounded-md p-3 flex items-start gap-2">
-              <AlertTriangle className="h-5 w-5 flex-shrink-0 mt-0.5" />
-              <div>
-                <p className="font-medium">Horario Otoño 2025</p>
-                <p className="text-sm mt-1">10 conflictos por resolver</p>
-              </div>
-            </div>
-            
-            <div className="mt-auto text-center">
-              <Button asChild className="w-full">
-                <Link to="/schedule">Ver Horario</Link>
-              </Button>
-            </div>
-          </div>
-        </Card>
-      </div>
+          {materias.map(m => (
+            <Card key={m.id} className="mb-2">
+              <CardHeader className="flex justify-between">
+                <CardTitle>{m.nombre_materia} ({m.codigo_materia})</CardTitle>
+                <div className="flex gap-2">
+                  <Button size="icon" variant="ghost" onClick={() => handleOpenEditMateriaDialog(m)}><Pencil className="w-4 h-4" /></Button>
+                  <Button size="icon" variant="ghost" onClick={() => handleDeleteMateria(m.id)}><Trash2 className="w-4 h-4" /></Button>
+                </div>
+              </CardHeader>
+            </Card>
+          ))}
+        </>
+      )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card className="dashboard-card">
-          <div className="card-header">
-            <Users className="h-5 w-5" />
-            <span>Estado de Docentes</span>
-          </div>
-          <div className="space-y-3">
-            <div className="flex justify-between items-center border-b pb-2">
-              <span>Carga Completa</span>
-              <span className="font-medium">28 docentes</span>
-            </div>
-            <div className="flex justify-between items-center border-b pb-2">
-              <span>Carga Parcial</span>
-              <span className="font-medium">12 docentes</span>
-            </div>
-            <div className="flex justify-between items-center border-b pb-2">
-              <span>De Permiso</span>
-              <span className="font-medium">5 docentes</span>
-            </div>
-            <div className="mt-auto text-center pt-4">
-              <Button variant="outline" asChild className="w-full">
-                <Link to="/faculty">Gestionar Docentes</Link>
-              </Button>
-            </div>
-          </div>
-        </Card>
+      {/* Dialogo de Carrera */}
+      <Dialog open={dialogCarreraOpen} onOpenChange={setDialogCarreraOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{formCarrera.id ? "Editar Carrera" : "Nueva Carrera"}</DialogTitle>
+            <DialogDescription>Complete el nombre de la carrera</DialogDescription>
+          </DialogHeader>
+          <Input
+            placeholder="Nombre de la carrera"
+            value={formCarrera.nombre_carrera}
+            onChange={(e) => setFormCarrera({ ...formCarrera, nombre_carrera: e.target.value })}
+          />
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDialogCarreraOpen(false)}>Cancelar</Button>
+            <Button onClick={handleSaveCarrera}>Guardar</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
-        <Card className="dashboard-card">
-          <div className="card-header">
-            <Layers className="h-5 w-5" />
-            <span>Distribución de Asignaturas</span>
-          </div>
-          <div className="space-y-3">
-            <div className="flex justify-between items-center border-b pb-2">
-              <span>Ciencias de la Computación</span>
-              <span className="font-medium">32 asignaturas</span>
-            </div>
-            <div className="flex justify-between items-center border-b pb-2">
-              <span>Administración de Empresas</span>
-              <span className="font-medium">28 asignaturas</span>
-            </div>
-            <div className="flex justify-between items-center border-b pb-2">
-              <span>Artes Liberales</span>
-              <span className="font-medium">45 asignaturas</span>
-            </div>
-            <div className="flex justify-between items-center border-b pb-2">
-              <span>Ingeniería</span>
-              <span className="font-medium">23 asignaturas</span>
-            </div>
-            <div className="mt-auto text-center pt-4">
-              <Button variant="outline" asChild className="w-full">
-                <Link to="/courses">Gestionar Asignaturas</Link>
-              </Button>
-            </div>
-          </div>
-        </Card>
-      </div>
+      {/* Dialogo de Materia */}
+      <Dialog open={dialogMateriaOpen} onOpenChange={setDialogMateriaOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{formMateria.id ? "Editar Materia" : "Nueva Materia"}</DialogTitle>
+          <DialogDescription>Ingrese los datos de la materia</DialogDescription>
+          </DialogHeader>
+          <Input
+            placeholder="Nombre"
+            value={formMateria.nombre}
+            onChange={(e) => setFormMateria({ ...formMateria, nombre: e.target.value })}
+          />
+          <Input
+            placeholder="Código"
+            value={formMateria.codigo}
+            onChange={(e) => setFormMateria({ ...formMateria, codigo: e.target.value })}
+          />
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDialogMateriaOpen(false)}>Cancelar</Button>
+            <Button onClick={handleSaveMateria}>Guardar</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

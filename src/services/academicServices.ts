@@ -1,115 +1,62 @@
-
 import api from "./api";
 
-// Interfaces para entidades académicas
-export interface UnidadAcademica {
-  id: number;
-  nombre: string;
+export interface UnidadAcademica { id: number; nombre: string; }
+export interface Carrera { id: number; nombre_carrera: string; unidad: number; }
+export interface Materia { id: number; materia_id: number; nombre_materia: string; codigo_materia: string; }
+export interface CarreraMateria { id: number; carrera: number; materia: number; ciclo_sugerido?: number | null; }
+
+function normalizeDataArray<T>(data: any): T[] {
+  if (Array.isArray(data)) return data;
+  if (data && Array.isArray(data.results)) return data.results;
+  return [];
 }
 
-export interface Carrera {
-  id: number;
-  nombre: string;
-  unidad_academica: number;
-}
-
-export interface PeriodoAcademico {
-  id: number;
-  nombre: string;
-  fecha_inicio: string;
-  fecha_fin: string;
-  activo: boolean;
-}
-
-export interface TipoEspacio {
-  id: number;
-  nombre: string;
-}
-
-export interface EspacioFisico {
-  id: number;
-  nombre: string;
-  capacidad: number;
-  tipo: number;
-}
-
-export interface Especialidad {
-  id: number;
-  nombre: string;
-}
-
-export interface Materia {
-  id: number;
-  nombre: string;
-  codigo: string;
-}
-
-export interface CarreraMateria {
-  id: number;
-  carrera: number;
-  materia: number;
-  semestre: number;
-}
-
-export interface MateriaEspecialidad {
-  id: number;
-  materia: number;
-  especialidad: number;
-}
-
-// Servicios para endpoints públicos académicos
 export const academicServices = {
-  // Unidades Académicas
-  getUnidadesAcademicas: async () => {
+  getUnidadesAcademicas: async (): Promise<UnidadAcademica[]> => {
     const response = await api.get("/api/academic/unidades-academicas/");
-    return response.data;
+    const raw = Array.isArray(response.data.results) ? response.data.results : [];
+    return raw.map((u: any) => ({
+      id: u.unidad_id,
+      nombre: u.nombre_unidad
+    }));
   },
-
-  // Carreras
-  getCarreras: async () => {
-    const response = await api.get("/api/academic/carreras/");
-    return response.data;
+  getCarreras: async (): Promise<Carrera[]> => {
+    const res = await api.get("/api/academic/carreras/");
+    return normalizeDataArray<Carrera>(res.data);
   },
+  createCarrera: (nombre_carrera: string, unidad: number) =>
+    api.post("/api/academic/carreras/", { nombre_carrera, unidad }),
+  updateCarrera: (id: number, nombre_carrera: string, unidad: number) =>
+    api.put(`/api/academic/carreras/${id}/`, { nombre_carrera, unidad }),
+  deleteCarrera: (id: number) => api.delete(`/api/academic/carreras/${id}/`),
 
-  // Períodos Académicos
-  getPeriodosAcademicos: async () => {
-    const response = await api.get("/api/academic/periodos-academicos/");
-    return response.data;
+  getMaterias: async (): Promise<Materia[]> => {
+    const res = await api.get("/api/academic/materias/");
+    return normalizeDataArray<Materia>(res.data).map(m => ({
+      id: m.materia_id,
+      materia_id: m.materia_id,
+      nombre_materia: m.nombre_materia,
+      codigo_materia: m.codigo_materia,
+      nombre: m.nombre_materia, // Manteniendo para uso interno en el frontend si es necesario
+      codigo: m.codigo_materia,   // Manteniendo para uso interno en el frontend si es necesario
+    }));
   },
+  createMateria: (nombre: string, codigo: string) =>
+    api.post("/api/academic/materias/", { nombre_materia: nombre, codigo_materia: codigo }),
+  updateMateria: (id: number, nombre: string, codigo: string) =>
+    api.put(`/api/academic/materias/${id}/`, { nombre_materia: nombre, codigo_materia: codigo }),
+  deleteMateria: (id: number) => api.delete(`/api/academic/materias/${id}/`),
 
-  // Tipos de Espacio
-  getTiposEspacio: async () => {
-    const response = await api.get("/api/academic/tipos-espacio/");
-    return response.data;
+  getRelacionesCarreraMateria: async (): Promise<CarreraMateria[]> => {
+    const res = await api.get("/api/academic/carrera-materias/");
+    return normalizeDataArray<CarreraMateria>(res.data).map(rel => ({
+      id: rel.id,
+      carrera: rel.carrera,
+      materia: rel.materia,
+      ciclo_sugerido: rel.ciclo_sugerido,
+    }));
   },
-
-  // Espacios Físicos
-  getEspaciosFisicos: async () => {
-    const response = await api.get("/api/academic/espacios-fisicos/");
-    return response.data;
-  },
-
-  // Especialidades
-  getEspecialidades: async () => {
-    const response = await api.get("/api/academic/especialidades/");
-    return response.data;
-  },
-
-  // Materias
-  getMaterias: async () => {
-    const response = await api.get("/api/academic/materias/");
-    return response.data;
-  },
-
-  // Relación Carrera-Materias
-  getCarreraMaterias: async () => {
-    const response = await api.get("/api/academic/carrera-materias/");
-    return response.data;
-  },
-
-  // Especialidades requeridas por materia
-  getMateriaEspecialidadesRequeridas: async () => {
-    const response = await api.get("/api/academic/materia-especialidades-requeridas/");
-    return response.data;
-  }
+  createCarreraMateria: (carrera: number, materia: number, ciclo_sugerido?: number | null) =>
+    api.post("/api/academic/carrera-materias/", { carrera, materia, ciclo_sugerido }),
+  deleteCarreraMateria: (id: number) => api.delete(`/api/academic/carrera-materias/${id}/`),
 };
