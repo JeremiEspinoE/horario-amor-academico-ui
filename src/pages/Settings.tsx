@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import {
   Check,
@@ -46,10 +47,12 @@ import { v4 as uuidv4 } from 'uuid';
 import { useAppContext } from "@/context/AppContext";
 import InstitucionNombre from "./gestion_academica/InstitucionNombre";
 import PeriodoAcademico from "./gestion_academica/PeriodoAcademico";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export default function Settings() {
   const { toast } = useToast();
   const { userRole, classroomTypes: contextClassroomTypes, setClassroomTypes: setContextClassroomTypes } = useAppContext();
+  const isMobile = useIsMobile();
   
   // Only admin can see all tabs, teachers will only see account tab
   const [activeTab, setActiveTab] = useState(userRole === "administrativo" ? "academic-periods" : "account");
@@ -120,13 +123,13 @@ export default function Settings() {
   const isTeacherView = userRole === "docente";
 
   return (
-    <div className="space-y-6 animate-fade-in">
-      <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold">
+    <div className="space-y-6 animate-fade-in px-2 sm:px-4 md:px-0">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-0">
+        <h1 className="text-2xl sm:text-3xl font-bold">
           {isTeacherView ? "Mi Perfil" : "Configuración"}
         </h1>
         {!isTeacherView && (
-          <Button onClick={handleSaveSettings}>
+          <Button onClick={handleSaveSettings} className="w-full sm:w-auto">
             <Save className="mr-2 h-4 w-4" />
             Guardar Cambios
           </Button>
@@ -136,11 +139,11 @@ export default function Settings() {
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
         {/* Only show all tabs for administrators */}
         {!isTeacherView ? (
-          <TabsList>
-            <TabsTrigger value="academic-periods">Periodos Académicos</TabsTrigger>
-            <TabsTrigger value="room-types">Tipos de Aula</TabsTrigger>
-            <TabsTrigger value="general">Configuración General</TabsTrigger>
-            <TabsTrigger value="account">Cuenta</TabsTrigger>
+          <TabsList className="w-full overflow-x-auto flex-nowrap flex justify-start sm:justify-center">
+            <TabsTrigger value="academic-periods" className="whitespace-nowrap">Periodos Académicos</TabsTrigger>
+            <TabsTrigger value="room-types" className="whitespace-nowrap">Tipos de Aula</TabsTrigger>
+            <TabsTrigger value="general" className="whitespace-nowrap">Configuración General</TabsTrigger>
+            <TabsTrigger value="account" className="whitespace-nowrap">Cuenta</TabsTrigger>
           </TabsList>
         ) : (
           <TabsList>
@@ -155,7 +158,6 @@ export default function Settings() {
             <TabsContent value="academic-periods" className="space-y-4">
               <PeriodoAcademico />
             </TabsContent>
-            
             <TabsContent value="room-types" className="space-y-4">
               <Card>
                 <CardHeader>
@@ -266,7 +268,7 @@ export default function Settings() {
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="space-y-4">
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-4 flex-wrap sm:flex-nowrap">
                   <div className="h-16 w-16 rounded-full bg-muted flex items-center justify-center">
                     <User className="h-8 w-8 text-muted-foreground" />
                   </div>
@@ -332,7 +334,7 @@ export default function Settings() {
                   </div>
                 </div>
                 
-                <Button size="sm">Cambiar Contraseña</Button>
+                <Button size="sm" className="w-full sm:w-auto">Cambiar Contraseña</Button>
               </div>
               
               {isTeacherView && (
@@ -381,7 +383,7 @@ export default function Settings() {
               <div className="border-t pt-4">
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
-                    <Button variant="destructive">
+                    <Button variant="destructive" className="w-full sm:w-auto">
                       <LogOut className="mr-2 h-4 w-4" />
                       Cerrar Sesión
                     </Button>
@@ -393,9 +395,9 @@ export default function Settings() {
                         ¿Estás seguro de que deseas cerrar sesión en el sistema?
                       </AlertDialogDescription>
                     </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                      <AlertDialogAction>Cerrar Sesión</AlertDialogAction>
+                    <AlertDialogFooter className="flex-col sm:flex-row gap-2 sm:gap-0">
+                      <AlertDialogCancel className="w-full sm:w-auto">Cancelar</AlertDialogCancel>
+                      <AlertDialogAction className="w-full sm:w-auto">Cerrar Sesión</AlertDialogAction>
                     </AlertDialogFooter>
                   </AlertDialogContent>
                 </AlertDialog>
