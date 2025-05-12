@@ -16,6 +16,7 @@ import Settings from "./pages/Settings";
 import AppLayout from "./components/layout/AppLayout";
 import NotFound from "./pages/NotFound";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
+import { SidebarProvider } from "@/components/ui/sidebar";
 
 const queryClient = new QueryClient();
 
@@ -27,7 +28,9 @@ const AppWithProviders = () => (
         <Route path="/login" element={<Login />} />
         <Route element={
           <ProtectedRoute>
-            <AppLayout />
+            <SidebarProvider defaultOpen={false}>
+              <AppLayout />
+            </SidebarProvider>
           </ProtectedRoute>
         }>
           <Route path="/dashboard" element={<Dashboard />} />
