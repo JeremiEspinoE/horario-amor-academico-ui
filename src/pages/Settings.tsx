@@ -44,7 +44,8 @@ import {
 import { ClassroomType, ClassroomTypes } from "@/components/Classroom/ClassroomTypes";
 import { v4 as uuidv4 } from 'uuid';
 import { useAppContext } from "@/context/AppContext";
-import InstitucionNombre from "./InstitucionNombre";
+import InstitucionNombre from "./gestion_academica/InstitucionNombre";
+import PeriodoAcademico from "./gestion_academica/PeriodoAcademico";
 
 export default function Settings() {
   const { toast } = useToast();
@@ -149,127 +150,10 @@ export default function Settings() {
         
         {!isTeacherView && (
           <>
+            {/* Gestion de Periodo */}
+             {/* Gestion de Periodo */}
             <TabsContent value="academic-periods" className="space-y-4">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Periodos Académicos</CardTitle>
-                  <CardDescription>
-                    Gestiona periodos académicos y de programación
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                  <div className="space-y-4">
-                    <div className="flex justify-between items-center">
-                      <h3 className="text-lg font-medium">Periodo Actual</h3>
-                      <div className="px-3 py-1 bg-primary/20 text-primary rounded-full text-sm font-medium">
-                        Activo
-                      </div>
-                    </div>
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="current-period-name">Nombre del Periodo</Label>
-                        <Input
-                          id="current-period-name"
-                          placeholder="Nombre del periodo"
-                          defaultValue="Primavera 2025"
-                        />
-                      </div>
-                      
-                      <div className="space-y-2">
-                        <Label htmlFor="current-period-status">Estado</Label>
-                        <Select defaultValue="active">
-                          <SelectTrigger id="current-period-status">
-                            <SelectValue placeholder="Seleccionar estado" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="planning">Planificación</SelectItem>
-                            <SelectItem value="active">Activo</SelectItem>
-                            <SelectItem value="completed">Completado</SelectItem>
-                            <SelectItem value="archived">Archivado</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      
-                      <div className="space-y-2">
-                        <Label htmlFor="current-period-start">Fecha de Inicio</Label>
-                        <Input
-                          id="current-period-start"
-                          type="date"
-                          defaultValue="2025-01-15"
-                        />
-                      </div>
-                      
-                      <div className="space-y-2">
-                        <Label htmlFor="current-period-end">Fecha de Fin</Label>
-                        <Input
-                          id="current-period-end"
-                          type="date"
-                          defaultValue="2025-05-15"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="border-t pt-4">
-                    <h3 className="text-lg font-medium mb-4">Próximos Periodos</h3>
-                    
-                    <div className="space-y-4">
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 border rounded-md p-4">
-                        <div>
-                          <Label className="mb-1 block">Nombre del Periodo</Label>
-                          <Input defaultValue="Otoño 2025" />
-                        </div>
-                        
-                        <div className="grid grid-cols-2 gap-2">
-                          <div>
-                            <Label className="mb-1 block">Fecha de Inicio</Label>
-                            <Input type="date" defaultValue="2025-09-01" />
-                          </div>
-                          <div>
-                            <Label className="mb-1 block">Fecha de Fin</Label>
-                            <Input type="date" defaultValue="2025-12-15" />
-                          </div>
-                        </div>
-                        
-                        <div className="flex items-end">
-                          <Button className="w-full" variant="outline">
-                            Configurar
-                          </Button>
-                        </div>
-                      </div>
-                      
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 border rounded-md p-4">
-                        <div>
-                          <Label className="mb-1 block">Nombre del Periodo</Label>
-                          <Input defaultValue="Primavera 2026" />
-                        </div>
-                        
-                        <div className="grid grid-cols-2 gap-2">
-                          <div>
-                            <Label className="mb-1 block">Fecha de Inicio</Label>
-                            <Input type="date" defaultValue="2026-01-15" />
-                          </div>
-                          <div>
-                            <Label className="mb-1 block">Fecha de Fin</Label>
-                            <Input type="date" defaultValue="2026-05-15" />
-                          </div>
-                        </div>
-                        
-                        <div className="flex items-end">
-                          <Button className="w-full" variant="outline">
-                            Configurar
-                          </Button>
-                        </div>
-                      </div>
-                      
-                      <Button variant="outline" className="w-full">
-                        Agregar Nuevo Periodo
-                      </Button>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+              <PeriodoAcademico />
             </TabsContent>
             
             <TabsContent value="room-types" className="space-y-4">
@@ -301,6 +185,7 @@ export default function Settings() {
                 </CardHeader>
                 <CardContent className="space-y-6">
                   <div className="grid gap-6">
+                    {/*Configuracion de Institucion */}
                     <InstitucionNombre />
                     
                     <div className="space-y-2">
