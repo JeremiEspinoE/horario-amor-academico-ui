@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
+import { authService } from "@/services/authService";
 
 export default function Login() {
   const [username, setUsername] = useState("");
@@ -17,7 +18,7 @@ export default function Login() {
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!username || !password) {
@@ -31,15 +32,24 @@ export default function Login() {
     
     setIsLoading(true);
     
-    // Simulate API call
-    setTimeout(() => {
-      setIsLoading(false);
-      toast({
-        title: "¡Bienvenido!",
-        description: "Has iniciado sesión en AcadScheduler",
+    try {
+      const success = await authService.login({
+        username,
+        password
       });
-      navigate("/dashboard");
-    }, 1500);
+      
+      if (success) {
+        toast({
+          title: "¡Bienvenido!",
+          description: "Has iniciado sesión en AcadScheduler",
+        });
+        navigate("/dashboard");
+      }
+    } catch (error) {
+      console.error("Error de inicio de sesión:", error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const toggleShowPassword = () => {

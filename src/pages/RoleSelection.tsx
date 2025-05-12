@@ -8,17 +8,17 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import { useAppContext } from "@/context/AppContext";
+import { authService } from "@/services/authService";
 
 export default function RoleSelection() {
   const [selectedRole, setSelectedRole] = useState<string>("");
   const navigate = useNavigate();
   const { setUserRole } = useAppContext();
   
-  // Comprobar si ya existe un rol guardado
+  // Comprobar si ya existe un token guardado
   useEffect(() => {
-    const savedRole = localStorage.getItem('userRole');
-    if (savedRole) {
-      // Si ya hay un rol guardado, ir directo al dashboard
+    if (authService.isAuthenticated()) {
+      // Si ya hay un token guardado, ir directo al dashboard
       navigate("/dashboard");
     }
   }, [navigate]);
