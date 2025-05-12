@@ -44,6 +44,7 @@ import {
 import { ClassroomType, ClassroomTypes } from "@/components/Classroom/ClassroomTypes";
 import { v4 as uuidv4 } from 'uuid';
 import { useAppContext } from "@/context/AppContext";
+import InstitucionNombre from "./InstitucionNombre";
 
 export default function Settings() {
   const { toast } = useToast();
@@ -300,14 +301,7 @@ export default function Settings() {
                 </CardHeader>
                 <CardContent className="space-y-6">
                   <div className="grid gap-6">
-                    <div className="space-y-2">
-                      <Label htmlFor="institution-name">Nombre de la Institución</Label>
-                      <Input
-                        id="institution-name"
-                        placeholder="Nombre de la institución"
-                        defaultValue="Universidad Académica"
-                      />
-                    </div>
+                    <InstitucionNombre />
                     
                     <div className="space-y-2">
                       <Label htmlFor="schedule-slots">Duración Predeterminada de Hora Clase (minutos)</Label>
