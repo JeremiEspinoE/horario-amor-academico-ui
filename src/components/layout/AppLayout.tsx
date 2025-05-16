@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Link, Outlet, useNavigate } from "react-router-dom";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
@@ -11,7 +10,13 @@ import {
   Settings, 
   TestTube,
   Smartphone,
-  Monitor
+  Monitor,
+  LayoutDashboard,
+  Users,
+  BookOpen,
+  Calendar,
+  BookText,
+  UserCircle
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";

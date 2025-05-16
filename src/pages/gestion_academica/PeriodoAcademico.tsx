@@ -1,5 +1,6 @@
+
 import { useState, useEffect } from "react";
-import { Calendar, Loader2 } from "lucide-react";
+import { Calendar as CalendarIcon, Loader2 } from "lucide-react";
 import api from "@/services/api";
 import { toast } from "sonner";
 
@@ -19,10 +20,10 @@ const CardDescription = ({ children }) => (
 const CardContent = ({ children, className = "" }) => (
   <div className={`p-6 pt-0 ${className}`}>{children}</div>
 );
-const Label = ({ children, htmlFor, className = "" }) => (
+const Label = ({ children, htmlFor = "", className = "" }) => (
   <label htmlFor={htmlFor} className={`text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 ${className}`}>{children}</label>
 );
-const Input = ({ id, type = "text", value, defaultValue, placeholder, className = "", onChange, readOnly = false, disabled = false, ...props }) => (
+const Input = ({ id = "", type = "text", value = "", defaultValue = "", placeholder = "", className = "", onChange = () => {}, readOnly = false, disabled = false, ...props }) => (
   <input
     id={id}
     type={type}
@@ -36,13 +37,14 @@ const Input = ({ id, type = "text", value, defaultValue, placeholder, className 
     {...props}
   />
 );
-const Button = ({ children, variant = "default", className = "", onClick, disabled = false, loading = false, ...props }) => {
+const Button = ({ children, variant = "default", className = "", onClick = () => {}, disabled = false, loading = false, type = "button", ...props }) => {
   const getVariantClass = () => {
     if (variant === "outline") return "border border-input bg-background hover:bg-accent hover:text-accent-foreground";
     return "bg-primary text-primary-foreground hover:bg-primary/90";
   };
   return (
     <button
+      type={type}
       onClick={onClick}
       disabled={disabled}
       className={`inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 h-10 px-4 py-2 ${getVariantClass()} ${className}`}
@@ -79,7 +81,7 @@ const Dialog = ({ isOpen, onClose, children, title }) => {
 };
 
 // DatePicker implementación correcta
-const DatePicker = ({ value, onChange, id, disabled = false }) => {
+const DatePicker = ({ value, onChange, id = "", disabled = false }) => {
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const [currentDate, setCurrentDate] = useState(value || "");
 
@@ -110,8 +112,8 @@ const DatePicker = ({ value, onChange, id, disabled = false }) => {
     <div className="relative">
       <div className="flex">
         <Input
-          type="date"
           id={id}
+          type="date"
           value={currentDate}
           onChange={handleInputChange}
           disabled={disabled}
@@ -123,7 +125,7 @@ const DatePicker = ({ value, onChange, id, disabled = false }) => {
           className={`absolute right-0 top-0 h-10 w-10 flex items-center justify-center ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
           disabled={disabled}
         >
-          <Calendar className="h-4 w-4" />
+          <CalendarIcon className="h-4 w-4" />
         </button>
       </div>
     </div>
@@ -174,7 +176,11 @@ export default function AcademicPeriods() {
           ...p,
           fecha_inicio: p.fecha_inicio?.split('T')[0] || '',
           fecha_fin:    p.fecha_fin?.split('T')[0]    || ''
-        })).sort((a, b) => new Date(b.fecha_inicio) - new Date(a.fecha_inicio));
+        })).sort((a, b) => {
+          const dateA = new Date(b.fecha_inicio).getTime();
+          const dateB = new Date(a.fecha_inicio).getTime();
+          return dateA - dateB;
+        });
         setPeriods(arr);
         setCurrentPeriod(arr.find(p => p.activo) || arr[0] || null);
       } catch (e) {
@@ -222,7 +228,11 @@ export default function AcademicPeriods() {
       setIsSubmitting(false);
       return;
     }
-    if (new Date(formData.fecha_inicio) >= new Date(formData.fecha_fin)) {
+    
+    const startDate = new Date(formData.fecha_inicio).getTime();
+    const endDate = new Date(formData.fecha_fin).getTime();
+    
+    if (startDate >= endDate) {
       setError("La fecha de fin debe ser posterior.");
       setIsSubmitting(false);
       return;
@@ -255,7 +265,13 @@ export default function AcademicPeriods() {
           updatedList = updatedList.map(p => p.periodo_id !== formatted.periodo_id ? { ...p, activo: false } : p);
         }
       }
-      updatedList.sort((a, b) => new Date(b.fecha_inicio) - new Date(a.fecha_inicio));
+      
+      updatedList.sort((a, b) => {
+        const dateA = new Date(b.fecha_inicio).getTime();
+        const dateB = new Date(a.fecha_inicio).getTime();
+        return dateA - dateB;
+      });
+      
       setPeriods(updatedList);
       setIsModalOpen(false);
     } catch (e) {
@@ -293,9 +309,9 @@ export default function AcademicPeriods() {
         {currentPeriod && (
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="space-y-1"><Label>Nombre</Label><Input value={currentPeriod.nombre_periodo} readOnly /></div>
-              <div className="space-y-1"><Label>Inicio</Label><Input type="date" value={currentPeriod.fecha_inicio} readOnly /></div>
-              <div className="space-y-1"><Label>Fin</Label><Input type="date" value={currentPeriod.fecha_fin} readOnly /></div>
+              <div className="space-y-1"><Label htmlFor="nombre">Nombre</Label><Input id="nombre" value={currentPeriod.nombre_periodo} readOnly defaultValue="" placeholder="" /></div>
+              <div className="space-y-1"><Label htmlFor="fecha-inicio">Inicio</Label><Input id="fecha-inicio" type="date" value={currentPeriod.fecha_inicio} readOnly defaultValue="" placeholder="" /></div>
+              <div className="space-y-1"><Label htmlFor="fecha-fin">Fin</Label><Input id="fecha-fin" type="date" value={currentPeriod.fecha_fin} readOnly defaultValue="" placeholder="" /></div>
             </div>
             <div className="flex justify-end"><Button variant="outline" onClick={() => handleEditClick(currentPeriod)} disabled={isFetching}>Configurar</Button></div>
           </CardContent>
@@ -327,20 +343,20 @@ export default function AcademicPeriods() {
         <form onSubmit={handleSubmit} className="space-y-4">
           {error && isModalOpen && <div className="p-3 bg-destructive/10 text-destructive border rounded-md text-sm">{error}</div>}
           <div className="space-y-2">
-            <Label>Nombre *</Label>
-            <Input name="nombre_periodo" value={formData.nombre_periodo} onChange={handleInputChange} required disabled={isSubmitting}/>
+            <Label htmlFor="nombre_periodo">Nombre *</Label>
+            <Input id="nombre_periodo" name="nombre_periodo" value={formData.nombre_periodo} onChange={handleInputChange} required disabled={isSubmitting} defaultValue="" placeholder=""/>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label>Fecha Inicio *</Label>
-              <DatePicker value={formData.fecha_inicio} onChange={date => handleDateChange('fecha_inicio', date)} disabled={isSubmitting}/>
+              <Label htmlFor="fecha_inicio">Fecha Inicio *</Label>
+              <DatePicker id="fecha_inicio" value={formData.fecha_inicio} onChange={date => handleDateChange('fecha_inicio', date)} disabled={isSubmitting}/>
             </div>
             <div className="space-y-2">
-              <Label>Fecha Fin *</Label>
-              <DatePicker value={formData.fecha_fin} onChange={date => handleDateChange('fecha_fin', date)} disabled={isSubmitting}/>
+              <Label htmlFor="fecha_fin">Fecha Fin *</Label>
+              <DatePicker id="fecha_fin" value={formData.fecha_fin} onChange={date => handleDateChange('fecha_fin', date)} disabled={isSubmitting}/>
             </div>
           </div>
-          <div className="flex items-center space-x-2"><input type="checkbox" name="activo" checked={formData.activo} onChange={handleInputChange} disabled={isSubmitting}/><Label>Marcar como activo</Label></div>
+          <div className="flex items-center space-x-2"><input type="checkbox" name="activo" checked={formData.activo} onChange={handleInputChange} disabled={isSubmitting} id="activo"/><Label htmlFor="activo">Marcar como activo</Label></div>
           <div className="flex justify-end space-x-2 pt-4">
             <Button variant="outline" onClick={() => setIsModalOpen(false)} disabled={isSubmitting}>Cancelar</Button>
             <Button type="submit" loading={isSubmitting} disabled={isSubmitting}>{isSubmitting ? (editingPeriod ? 'Actualizando...' : 'Guardando...') : (editingPeriod ? 'Actualizar' : 'Guardar')}</Button>

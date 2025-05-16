@@ -7,6 +7,7 @@ export interface Docente {
   nombre: string;
   apellido: string;
   especialidades: string[];
+  departamento?: string; // Added this property
 }
 
 export interface DocenteRequest {
