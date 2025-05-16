@@ -4,20 +4,14 @@ import { Link, Outlet, useNavigate } from "react-router-dom";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import { 
   Bell, 
-  BookOpen, 
-  Calendar, 
   ChevronLeft, 
   ChevronRight,
-  Home, 
-  LayoutDashboard, 
   LogOut, 
   Menu, 
   Settings, 
-  Users, 
-  BookText,
-  UserCircle,
-  FileSpreadsheet,
-  TestTube
+  TestTube,
+  Smartphone,
+  Monitor
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -32,6 +26,8 @@ import {
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { useAppContext } from "@/context/AppContext";
+import { useIsMobile } from "@/hooks/use-mobile";
+import ResponsiveNav from "./ResponsiveNav";
 
 const getNavItems = (role: string) => {
   const adminItems = [
@@ -57,11 +53,14 @@ export default function AppLayout() {
   const { toast } = useToast();
   const navigate = useNavigate();
   const { userRole, isTestMode, setTestMode } = useAppContext();
+  const isMobile = useIsMobile();
 
   const mainNavItems = getNavItems(userRole || "");
   
   const handleLogout = () => {
     localStorage.removeItem('userRole');
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('refresh_token');
     navigate('/');
   };
 
@@ -84,23 +83,32 @@ export default function AppLayout() {
     });
   };
 
+  const renderDeviceIcon = () => {
+    if (isMobile) {
+      return <Smartphone className="h-4 w-4 mr-2" />;
+    } else {
+      return <Monitor className="h-4 w-4 mr-2" />;
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background flex flex-col">
       {/* Banner de modo prueba */}
       {isTestMode && (
         <div className="bg-destructive text-destructive-foreground p-2 text-center font-medium">
           <TestTube className="inline-block mr-2 h-4 w-4" />
-          Estás en modo prueba - Los cambios no afectarán los datos reales
+          {isMobile ? "Modo prueba" : "Estás en modo prueba - Los cambios no afectarán los datos reales"}
         </div>
       )}
 
       <div className="flex flex-1">
-        {/* Sidebar */}
+        {/* Sidebar - Hidden on mobile */}
         <aside
           className={cn(
             "bg-sidebar text-sidebar-foreground fixed inset-y-0 left-0 z-50 flex flex-col border-r border-sidebar-border transition-all duration-300 ease-in-out",
             collapsed ? "w-[70px]" : "w-[250px]",
-            isTestMode && "mt-10" // Ajustar posición si está en modo prueba
+            isTestMode && "mt-10", // Ajustar posición si está en modo prueba
+            isMobile && "hidden" // Hide sidebar on mobile
           )}
         >
           <div className="flex items-center h-16 px-4 border-b border-sidebar-border">
@@ -158,8 +166,12 @@ export default function AppLayout() {
                     {userRole === "administrativo" ? "Usuario Administrativo" : "Usuario Docente"}
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem>Perfil</DropdownMenuItem>
-                  <DropdownMenuItem>Configuración</DropdownMenuItem>
+                  <DropdownMenuItem>
+                    <Link to="/settings" className="flex items-center gap-2 w-full">
+                      <Settings className="h-4 w-4" />
+                      <span>Perfil</span>
+                    </Link>
+                  </DropdownMenuItem>
                   {userRole === "administrativo" && (
                     <DropdownMenuItem onClick={handleTestModeToggle}>
                       <div className="flex items-center gap-2 w-full">
@@ -191,22 +203,21 @@ export default function AppLayout() {
         <div 
           className={cn(
             "flex flex-col flex-1 transition-all duration-300 ease-in-out",
-            collapsed ? "ml-[70px]" : "ml-[250px]",
+            !isMobile && (collapsed ? "ml-[70px]" : "ml-[250px]"),
             isTestMode && "pt-10" // Ajustar contenido principal si está en modo prueba
           )}
         >
           <header className="h-16 border-b border-border flex items-center gap-4 px-4">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="md:hidden"
-              onClick={toggleSidebar}
-            >
-              <Menu className="h-5 w-5" />
-            </Button>
+            {isMobile && (
+              <div className="flex items-center">
+                <ResponsiveNav />
+              </div>
+            )}
             
-            <div className="ml-auto flex items-center gap-2">
-              {userRole === "administrativo" && (
+            <div className={cn("ml-auto flex items-center gap-2", isMobile ? "ml-auto" : "")}>
+              {!isMobile && renderDeviceIcon()}
+              
+              {userRole === "administrativo" && !isMobile && (
                 <Button
                   variant={isTestMode ? "destructive" : "outline"}
                   onClick={handleTestModeToggle}
@@ -228,7 +239,7 @@ export default function AppLayout() {
             </div>
           </header>
 
-          <main className="flex-1 overflow-y-auto p-6">
+          <main className="flex-1 overflow-y-auto p-6 mobile-p-reduced">
             <Outlet />
           </main>
         </div>

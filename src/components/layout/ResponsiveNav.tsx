@@ -17,8 +17,17 @@ import {
   Calendar,
   User,
   Settings,
+  Menu,
 } from "lucide-react";
 import { useAppContext } from "@/context/AppContext";
+import { Button } from "@/components/ui/button";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 
 export default function ResponsiveNav() {
   const { userRole } = useAppContext();
@@ -87,28 +96,61 @@ export default function ResponsiveNav() {
 
   const menuItems = isTeacherView ? teacherMenuItems : adminMenuItems;
 
+  // For small screen devices (mobile)
   if (isMobile) {
     return (
-      <div className="flex overflow-x-auto pb-2 hide-scrollbar">
-        <div className="flex space-x-1 p-1">
-          {menuItems.map((item) => (
-            <Link
-              key={item.path}
-              to={item.path}
-              className={cn(
-                "flex items-center whitespace-nowrap rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-accent",
-                getActiveClass(item.path)
-              )}
-            >
-              {item.icon}
-              <span>{item.title}</span>
-            </Link>
-          ))}
+      <div className="w-full relative">
+        <Sheet>
+          <SheetTrigger asChild>
+            <Button variant="ghost" className="px-2">
+              <Menu className="h-5 w-5" />
+              <span className="ml-2">Menú</span>
+            </Button>
+          </SheetTrigger>
+          <SheetContent side="left" className="w-[75vw] sm:w-[350px]">
+            <SheetHeader>
+              <SheetTitle>Menú</SheetTitle>
+            </SheetHeader>
+            <div className="flex flex-col gap-2 py-4">
+              {menuItems.map((item) => (
+                <Link
+                  key={item.path}
+                  to={item.path}
+                  className={cn(
+                    "flex items-center py-2 px-4 rounded-md transition-colors hover:bg-accent hover:text-accent-foreground",
+                    getActiveClass(item.path)
+                  )}
+                >
+                  {item.icon}
+                  <span>{item.title}</span>
+                </Link>
+              ))}
+            </div>
+          </SheetContent>
+        </Sheet>
+        
+        <div className="flex overflow-x-auto py-2 hide-scrollbar">
+          <div className="flex space-x-1 px-1">
+            {menuItems.map((item) => (
+              <Link
+                key={item.path}
+                to={item.path}
+                className={cn(
+                  "flex items-center whitespace-nowrap rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-accent",
+                  getActiveClass(item.path)
+                )}
+              >
+                {item.icon}
+                <span>{item.title}</span>
+              </Link>
+            ))}
+          </div>
         </div>
       </div>
     );
   }
 
+  // For desktop view
   return (
     <NavigationMenu>
       <NavigationMenuList>

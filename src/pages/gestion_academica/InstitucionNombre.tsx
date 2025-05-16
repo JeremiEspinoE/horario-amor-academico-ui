@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Textarea } from "@/components/ui/textarea";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default function InstitucionFormulario() {
   const [nombreInstitucion, setNombreInstitucion] = useState("");
@@ -73,47 +74,54 @@ export default function InstitucionFormulario() {
   };
 
   return (
-    <div className="grid gap-6 w-full">
-      <div className="space-y-2">
-        <Label htmlFor="institution-name">Nombre de la Institución</Label>
-        <Input
-          id="institution-name"
-          placeholder="Nombre de la institución"
-          value={nombreInstitucion}
-          onChange={(e) => setNombreInstitucion(e.target.value)}
-          className="w-full"
-        />
-      </div>
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-xl">Información Institucional</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="grid gap-6 w-full">
+          <div className="space-y-2">
+            <Label htmlFor="institution-name">Nombre de la Institución</Label>
+            <Input
+              id="institution-name"
+              placeholder="Nombre de la institución"
+              value={nombreInstitucion}
+              onChange={(e) => setNombreInstitucion(e.target.value)}
+              className="w-full"
+            />
+          </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="institution-description">Descripción</Label>
-        {isMobile ? (
-          <Textarea
-            id="institution-description"
-            placeholder="Descripción de la institución"
-            value={descripcion}
-            onChange={(e) => setDescripcion(e.target.value)}
-            rows={3}
-            className="w-full"
-          />
-        ) : (
-          <Input
-            id="institution-description"
-            placeholder="Descripción de la institución"
-            value={descripcion}
-            onChange={(e) => setDescripcion(e.target.value)}
-            className="w-full"
-          />
-        )}
-      </div>
+          <div className="space-y-2">
+            <Label htmlFor="institution-description">Descripción</Label>
+            {isMobile ? (
+              <Textarea
+                id="institution-description"
+                placeholder="Descripción de la institución"
+                value={descripcion}
+                onChange={(e) => setDescripcion(e.target.value)}
+                rows={3}
+                className="w-full"
+              />
+            ) : (
+              <Input
+                id="institution-description"
+                placeholder="Descripción de la institución"
+                value={descripcion}
+                onChange={(e) => setDescripcion(e.target.value)}
+                className="w-full"
+              />
+            )}
+          </div>
 
-      <Button 
-        onClick={guardarCambios} 
-        disabled={loading}
-        className="w-full sm:w-auto"
-      >
-        {loading ? "Guardando..." : "Guardar cambios"}
-      </Button>
-    </div>
+          <Button 
+            onClick={guardarCambios} 
+            disabled={loading}
+            className="w-full sm:w-auto"
+          >
+            {loading ? "Guardando..." : "Guardar cambios"}
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
   );
 }
