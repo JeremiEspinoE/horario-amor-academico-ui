@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Link, Outlet, useNavigate } from "react-router-dom";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
@@ -244,7 +245,7 @@ export default function AppLayout() {
             </div>
           </header>
 
-          <main className="flex-1 overflow-y-auto p-6 mobile-p-reduced">
+          <main className="flex-1 overflow-y-auto p-6 md:p-8">
             <Outlet />
           </main>
         </div>
