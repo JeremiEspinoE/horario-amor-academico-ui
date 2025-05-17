@@ -53,10 +53,10 @@
   }
 }
 
-/* Desktop optimizations - new! */
+/* Desktop optimizations - improved! */
 @media (min-width: 1024px) {
   .desktop-container {
-    max-width: 1200px;
+    max-width: 1400px;
     margin-left: auto;
     margin-right: auto;
   }
@@ -80,10 +80,10 @@
   min-width: 44px;
 }
 
-/* Content area responsiveness */
+/* Content area responsiveness - updated to be more spacious */
 .content-container {
   width: 100%;
-  max-width: 1400px;
+  max-width: 1600px;
   margin: 0 auto;
   padding: 0 1rem;
 }
@@ -91,6 +91,12 @@
 @media (min-width: 768px) {
   .content-container {
     padding: 0 2rem;
+  }
+}
+
+@media (min-width: 1200px) {
+  .content-container {
+    padding: 0 3rem;
   }
 }
 
@@ -121,7 +127,42 @@
 
 @media (min-width: 1024px) {
   .card-layout {
-    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-    gap: 2rem;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 2.5rem;
+  }
+}
+
+/* Improved spacing for sections and cards */
+.section-spacing {
+  margin-bottom: 2.5rem;
+}
+
+@media (min-width: 1024px) {
+  .section-spacing {
+    margin-bottom: 3.5rem;
+  }
+}
+
+/* More breathing room for data tables */
+.data-table th,
+.data-table td {
+  padding: 1rem;
+}
+
+@media (min-width: 1024px) {
+  .data-table th,
+  .data-table td {
+    padding: 1.25rem;
+  }
+}
+
+/* More comfortable form element spacing */
+.form-spacing > * + * {
+  margin-top: 1.5rem;
+}
+
+@media (min-width: 1024px) {
+  .form-spacing > * + * {
+    margin-top: 2rem;
   }
 }

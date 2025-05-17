@@ -23,11 +23,11 @@ export function DatePicker({ className }: React.HTMLAttributes<HTMLDivElement>) 
             id="date"
             variant={"outline"}
             className={cn(
-              "w-full justify-start text-left font-normal",
+              "w-full justify-start text-left font-normal h-10",
               !date && "text-muted-foreground"
             )}
           >
-            <CalendarIcon className="mr-2 h-4 w-4" />
+            <CalendarIcon className="mr-2 h-5 w-5" />
             {date ? format(date, "PPP") : <span>Seleccionar fecha</span>}
           </Button>
         </PopoverTrigger>
@@ -86,11 +86,11 @@ export function DatePickerWithRange({
             id="date"
             variant={"outline"}
             className={cn(
-              "w-full justify-start text-left font-normal",
+              "w-full justify-start text-left font-normal h-10",
               !date && "text-muted-foreground"
             )}
           >
-            <CalendarIcon className="mr-2 h-4 w-4" />
+            <CalendarIcon className="mr-2 h-5 w-5" />
             {date?.from ? (
               date.to ? (
                 <>
@@ -113,6 +113,7 @@ export function DatePickerWithRange({
             selected={date}
             onSelect={handleSelect}
             numberOfMonths={2}
+            className="rounded-md border bg-card p-1"
           />
         </PopoverContent>
       </Popover>
