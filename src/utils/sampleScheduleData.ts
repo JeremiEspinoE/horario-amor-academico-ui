@@ -121,28 +121,28 @@ export const careers = [
 
 export const subjects = [
   // Ingeniería en Sistemas
-  { id: "sub1", name: "Programación I", code: "SIS-101", careerId: "car1" },
-  { id: "sub2", name: "Algoritmos y Estructuras", code: "SIS-102", careerId: "car1" },
-  { id: "sub3", name: "Base de Datos", code: "SIS-201", careerId: "car1" },
-  { id: "sub4", name: "Ingeniería de Software", code: "SIS-301", careerId: "car1" },
+  { id: "sub1", name: "Programación I", code: "SIS-101", careerId: "car1", hoursPerWeek: 4 },
+  { id: "sub2", name: "Algoritmos y Estructuras", code: "SIS-102", careerId: "car1", hoursPerWeek: 3 },
+  { id: "sub3", name: "Base de Datos", code: "SIS-201", careerId: "car1", hoursPerWeek: 3 },
+  { id: "sub4", name: "Ingeniería de Software", code: "SIS-301", careerId: "car1", hoursPerWeek: 4 },
   
   // Ingeniería Civil
-  { id: "sub5", name: "Cálculo I", code: "CIV-101", careerId: "car2" },
-  { id: "sub6", name: "Física I", code: "CIV-102", careerId: "car2" },
-  { id: "sub7", name: "Mecánica de Suelos", code: "CIV-201", careerId: "car2" },
+  { id: "sub5", name: "Cálculo I", code: "CIV-101", careerId: "car2", hoursPerWeek: 4 },
+  { id: "sub6", name: "Física I", code: "CIV-102", careerId: "car2", hoursPerWeek: 3 },
+  { id: "sub7", name: "Mecánica de Suelos", code: "CIV-201", careerId: "car2", hoursPerWeek: 3 },
   
   // Administración
-  { id: "sub8", name: "Fundamentos de Administración", code: "ADM-101", careerId: "car3" },
-  { id: "sub9", name: "Marketing", code: "ADM-201", careerId: "car3" },
-  { id: "sub10", name: "Finanzas", code: "ADM-301", careerId: "car3" },
+  { id: "sub8", name: "Fundamentos de Administración", code: "ADM-101", careerId: "car3", hoursPerWeek: 3 },
+  { id: "sub9", name: "Marketing", code: "ADM-201", careerId: "car3", hoursPerWeek: 2 },
+  { id: "sub10", name: "Finanzas", code: "ADM-301", careerId: "car3", hoursPerWeek: 3 },
   
   // Medicina
-  { id: "sub11", name: "Anatomía Humana", code: "MED-101", careerId: "car4" },
-  { id: "sub12", name: "Fisiología", code: "MED-102", careerId: "car4" },
+  { id: "sub11", name: "Anatomía Humana", code: "MED-101", careerId: "car4", hoursPerWeek: 5 },
+  { id: "sub12", name: "Fisiología", code: "MED-102", careerId: "car4", hoursPerWeek: 4 },
   
   // Matemáticas
-  { id: "sub13", name: "Álgebra Lineal", code: "MAT-101", careerId: "car5" },
-  { id: "sub14", name: "Cálculo Diferencial", code: "MAT-102", careerId: "car5" }
+  { id: "sub13", name: "Álgebra Lineal", code: "MAT-101", careerId: "car5", hoursPerWeek: 3 },
+  { id: "sub14", name: "Cálculo Diferencial", code: "MAT-102", careerId: "car5", hoursPerWeek: 4 }
 ];
 
 // Returns sample schedule with data
